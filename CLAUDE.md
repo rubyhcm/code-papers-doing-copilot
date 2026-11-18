@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **code-papers** (240 symbols, 234 relationships, 0 execution flows).
+This project is indexed by GitNexus as **code-papers-doing-copilot** (832 symbols, 1136 relationships, 17 execution flows).
 
 > Index stale? Run `node .gitnexus/run.cjs analyze --index-only` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? Bootstrap with `npx`, `bunx`, or `pnpm dlx` — e.g. `bunx gitnexus@latest analyze` (npm 11 npx crash; #1939).
 
@@ -25,10 +25,10 @@ This project is indexed by GitNexus as **code-papers** (240 symbols, 234 relatio
 
 | Resource | Use for |
 | --- | --- |
-| `gitnexus://repo/code-papers/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/code-papers/clusters` | All functional areas |
-| `gitnexus://repo/code-papers/processes` | All execution flows |
-| `gitnexus://repo/code-papers/process/{name}` | Step-by-step execution trace |
+| `gitnexus://repo/code-papers-doing-copilot/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/code-papers-doing-copilot/clusters` | All functional areas |
+| `gitnexus://repo/code-papers-doing-copilot/processes` | All execution flows |
+| `gitnexus://repo/code-papers-doing-copilot/process/{name}` | Step-by-step execution trace |
 
 ## CLI
 
