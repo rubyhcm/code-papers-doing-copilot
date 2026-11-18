@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="280" viewBox="0 0 960 280">
+  <rect width="960" height="280" fill="#ffffff"/>
+  <text x="480" y="35" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold">Phân loại bất thường trên log</text>
+  <g font-family="Arial" font-size="18">
+    <rect x="40" y="90" width="260" height="130" rx="12" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="170" y="125" text-anchor="middle" font-weight="bold">Điểm</text>
+    <text x="170" y="165" text-anchor="middle">Một dòng/event lệch</text>
+    <text x="170" y="195" text-anchor="middle">phân phối bình thường</text>
+    <rect x="350" y="90" width="260" height="130" rx="12" fill="#dcfce7" stroke="#16a34a"/>
+    <text x="480" y="125" text-anchor="middle" font-weight="bold">Tập thể</text>
+    <text x="480" y="165" text-anchor="middle">Chuỗi/block bất thường</text>
+    <text x="480" y="195" text-anchor="middle">khi xem như một tập thể</text>
+    <rect x="660" y="90" width="260" height="130" rx="12" fill="#fef3c7" stroke="#d97706"/>
+    <text x="790" y="125" text-anchor="middle" font-weight="bold">Ngữ cảnh</text>
+    <text x="790" y="165" text-anchor="middle">Bình thường ở ngữ cảnh này</text>
+    <text x="790" y="195" text-anchor="middle">bất thường ở ngữ cảnh khác</text>
+  </g>
+</svg>

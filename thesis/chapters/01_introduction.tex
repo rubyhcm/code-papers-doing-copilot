@@ -1,0 +1,46 @@
+\chapter{Giới thiệu}
+
+\section{Bối cảnh và động lực}
+Log hệ thống là nguồn dữ liệu quan trọng để giám sát vận hành, phát hiện sự cố
+và hỗ trợ AIOps. Các hệ thống phân tán và siêu máy tính có thể sinh hàng triệu
+bản ghi log trong thời gian ngắn. Do tính bán cấu trúc, phi dừng, mất cân bằng
+lớp và tốc độ sinh dữ liệu lớn, phát hiện bất thường dựa trên log đòi hỏi cả
+pipeline tiền xử lý phù hợp lẫn giao thức đánh giá có thể tái lập.
+
+\section{Vấn đề nghiên cứu}
+Các phương pháp phát hiện bất thường dựa trên log đã phát triển từ học máy cổ
+điển, học sâu tuần tự hoặc Transformer đến mô hình ngôn ngữ lớn kết hợp truy
+xuất. Tuy nhiên, kết quả công bố thường phụ thuộc dataset, parser, cách chia
+dữ liệu, ngữ nghĩa nhãn và phần cứng. Khoảng trống của nghiên cứu là thiếu một
+benchmark thống nhất cho ba họ phương pháp đại diện.
+
+\section{Mục tiêu và phạm vi}
+Luận văn đánh giá ba phương pháp đại diện: LightAD cho học máy cổ điển,
+LogFormer cho Transformer và LogRAG cho mô hình ngôn ngữ lớn kết hợp RAG.
+So sánh được thực hiện trên HDFS\_v1 và BGL trong một giao thức thống nhất.
+Phạm vi bao gồm hiệu quả phát hiện, chi phí tính toán, đánh đổi hiệu quả--chi
+phí, mẫu FP/FN và khả năng giải thích.
+
+\section{Câu hỏi nghiên cứu}
+\begin{itemize}
+  \item RQ1: Các phương pháp đạt Precision, Recall, F1, PR-AUC và FPR như thế
+  nào trên các dataset đã định nghĩa?
+  \item RQ2: Chi phí huấn luyện, suy luận, bộ nhớ và API là bao nhiêu?
+  \item RQ3: Đánh đổi giữa hiệu quả phát hiện và chi phí tài nguyên như thế
+  nào?
+  \item RQ4: Những kiểu FP/FN nào lặp lại và phương pháp nào cung cấp lời giải
+  thích hữu ích hơn?
+\end{itemize}
+
+\section{Đóng góp}
+\begin{enumerate}
+  \item Xây dựng pipeline thu thập, parsing, gom nhóm và đánh giá có thể tái lập.
+  \item So sánh ba họ kỹ thuật trong cùng điều kiện dataset và phần cứng.
+  \item Phân tích lỗi và khả năng giải thích ở cấp mẫu, template và nhóm.
+  \item Đưa ra khuyến nghị lựa chọn phương pháp theo ràng buộc vận hành.
+\end{enumerate}
+
+\section{Cấu trúc luận văn}
+Chương 2 trình bày nền tảng dữ liệu log và các họ phương pháp. Chương 3 mô tả
+thiết kế nghiên cứu. Chương 4 báo cáo kết quả. Chương 5 thảo luận, hạn chế và
+hướng phát triển. Chương 6 kết luận.

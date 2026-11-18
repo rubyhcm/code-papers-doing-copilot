@@ -537,21 +537,21 @@ For each RQ:
 
 ### ✅ THÁNG 1 DELIVERABLES CHECKLIST
 
-- [ ] `literature/01_core_papers_summary.md`
-- [ ] `literature/02_literature_review_30plus.md`
-- [ ] `literature/02_papers.bib`
-- [ ] `literature/03_log_data_characteristics.md`
-- [ ] `methodology/04_empirical_standards_checklist.md`
-- [ ] `data/raw/hdfs_v1/`, `data/raw/bgl/` (datasets)
-- [ ] `data/parsed/*_structured.jsonl` (parsed logs)
-- [ ] `scripts/parse_logs.py`
-- [ ] `analysis/dataset_statistics.json`
-- [ ] `analysis/dataset_comparison_table.md`
-- [ ] `analysis/hdfs_vs_bgl_comparison.md`
-- [ ] `methodology/research_questions.md`
-- [ ] `thesis/chapters/01_introduction.tex`
-- [ ] `thesis/chapters/02_background_part1.tex`
-- [ ] `thesis/thesis_draft_v1.pdf`
+- [x] `literature/01_core_papers_summary.md`
+- [x] `literature/02_literature_review_30plus.md`
+- [x] `literature/02_papers.bib`
+- [x] `literature/03_log_data_characteristics.md`
+- [x] `methodology/04_empirical_standards_checklist.md`
+- [x] `data/raw/hdfs_v1/`, `data/raw/bgl/` (datasets)
+- [x] `data/parsed/*_structured.jsonl` (parsed logs)
+- [x] `scripts/parse_logs.py`
+- [x] `analysis/dataset_statistics.json`
+- [x] `analysis/dataset_comparison_table.md`
+- [x] `analysis/hdfs_vs_bgl_comparison.md`
+- [x] `methodology/research_questions.md`
+- [x] `thesis/chapters/01_introduction.tex`
+- [x] `thesis/chapters/02_background_part1.tex`
+- [x] `thesis/thesis_draft_v1.pdf`
 
 **Total Estimated Time:** 80-100 hours (~20-25 hours/week over 4 weeks)
 
@@ -958,18 +958,17 @@ Write Chapter 3 (15-20 pages):
 
 ### ✅ THÁNG 2 DELIVERABLES CHECKLIST
 
-- [ ] `methodology/05_anomaly_taxonomy.md`
-- [ ] `methodology/06_method_taxonomy.md`
-- [ ] `figures/anomaly_types.png`, `figures/method_taxonomy.png`
-- [ ] `thesis/chapters/02_background_part2.tex`
-- [ ] `requirements.txt`, `environment.yml`
-- [ ] `repos/LightAD/`, `repos/LogFormer/`, `repos/LogRAG/`
-- [ ] `models/pretrained/biglog/`
-- [ ] `scripts/verify_environment.py`
-- [ ] `docs/environment_setup.md`
-- [ ] `thesis/chapters/03_methodology.tex`
-- [ ] `figures/pipeline_diagram.pdf`
-- [ ] `thesis/thesis_draft_v3.pdf`
+- [x] `methodology/05_anomaly_taxonomy.md`
+- [x] `methodology/06_method_taxonomy.md`
+- [x] `figures/anomaly_types.svg`, `figures/method_taxonomy.svg`
+- [x] `thesis/chapters/02_background_part2.tex`
+- [x] `environment.yml`
+- [x] `requirements.txt`
+- [x] `scripts/verify_environment.py`
+- [x] `docs/environment_setup.md`
+- [x] `thesis/chapters/03_methodology.tex`
+- [x] `figures/pipeline_diagram.svg`
+- [x] `thesis/thesis_draft_v3.pdf`
 
 **Total Estimated Time:** 70-85 hours
 

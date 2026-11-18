@@ -1,4 +1,5 @@
 data/raw
 data/
 .venv/
+.venv312/
 analysis/

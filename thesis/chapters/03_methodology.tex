@@ -1,0 +1,63 @@
+\chapter{Phương pháp nghiên cứu}
+
+\section{Thiết kế nghiên cứu}
+Nghiên cứu sử dụng thiết kế thực nghiệm empiral, trả lời RQ1-RQ4 bằng benchmark
+thống nhất trên ba phương pháp và hai dataset. Kết quả được so sánh trong cùng
+giao thức split, metric và phần cứng khi khả thi.
+
+\section{Câu hỏi nghiên cứu}
+\subsection{RQ1: Hiệu quả phát hiện}
+Đo Precision, Recall, F1, PR-AUC và FPR ở cấp line/block/window phù hợp dataset.
+\subsection{RQ2: Chi phí tính toán}
+Đo thời gian huấn luyện, độ trễ và throughput suy luận, peak memory và chi phí
+API/token đối với LogRAG.
+\subsection{RQ3: Đánh đổi}
+Tạo Pareto frontier giữa chất lượng phát hiện và chi phí tài nguyên.
+\subsection{RQ4: Lỗi và khả năng giải thích}
+Phân tầng FP/FN theo template, severity, kích thước nhóm và loại nhãn; đánh giá
+lời giải thích bằng rubric mù.
+
+\section{Pipeline thực nghiệm}
+\begin{enumerate}
+  \item Thu thập HDFS\_v1 và BGL.
+  \item Parse bằng Drain hoặc chuyển structured CSV.
+  \item Gom theo block HDFS hoặc window/line BGL.
+  \item Chia train/validation/test không rò rỉ.
+  \item Huấn luyện, suy luận, đo metric và chi phí.
+\end{enumerate}
+
+\subsection{Chia dữ liệu}
+HDFS\_v1 chia theo block ID để các dòng cùng block không nằm ở hai split.
+BGL dùng chronological split hoặc window split để giữ tính thời gian. Tỷ lệ
+đăng ký là 80/10/10 nếu dữ liệu và giao thức cho phép.
+
+\subsection{Chỉ số}
+\[
+\mathrm{Precision}=\frac{TP}{TP+FP},
+\quad
+\mathrm{Recall}=\frac{TP}{TP+FN}
+\]
+\[
+F1=\frac{2PR}{P+R},
+\quad
+\mathrm{FPR}=\frac{FP}{FP+TN}
+\]
+PR-AUC là diện tích dưới đường Precision--Recall. Mỗi kết quả phải ghi
+prevalence và threshold.
+
+\section{Kiểm soát công bằng}
+\subsection{Phần cứng}
+Ghi CPU/GPU, RAM, hệ điều hành, CUDA/MPS, driver và phiên bản thư viện.
+Chạy warm-up trước phép đo latency.
+
+\subsection{Seed và lặp lại}
+Seed kế hoạch: 42, 123, 456, 789 và 2024. Phương pháp ngẫu nhiên báo cáo mean
+$\pm$ standard deviation thay vì chọn seed cho ra kết quả đẹp nhất.
+
+\subsection{Hyperparameter}
+Ưu tiên cấu hình mặc định của paper. Chỉ tune trên validation. Không điều
+chỉnh hyperparameter bằng test set.
+
+\section{Giao thức tái lập}
+Lưu commit hash, checksum dataset, cấu hình parser, split, model config, raw
+predictions, hardware profile và script tạo bảng/figure.

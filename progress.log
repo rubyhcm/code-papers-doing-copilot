@@ -1,0 +1,19 @@
+# Tiến độ thực hiện ke_hoach_agent_executable.md
+
+## 2026-11-18
+
+- [x] TASK 1.1: Tóm tắt ba bài báo cốt lõi.
+- [x] TASK 1.2: Danh mục tài liệu 30+ công trình và BibTeX.
+- [x] TASK 1.3: Đặc điểm dữ liệu log.
+- [x] TASK 1.4: Checklist standards thực nghiệm.
+- [x] TASK 1.5: Xác minh dataset HDFS_v1 và BGL đã tải.
+- [x] TASK 1.6: Pipeline parse log đã tạo; BGL/HDFS đã chạy full.
+- [x] TASK 1.7: Thống kê dataset đã tính và đối chiếu.
+- [x] TASK 1.8: Bảng so sánh HDFS_v1 và BGL.
+- [x] TASK 1.9: RQ1-RQ4.
+- [x] TASK 1.10-1.11: Bản nháp Chương 1 và Chương 2 phần 1.
+- [x] TASK 1.12: Review Tháng 1.
+- [x] TASK 2.1-2.4: Phân loại anomaly và họ phương pháp.
+- [x] TASK 2.5: Chương 2 phần phát hiện bất thường đã được tạo.
+- [x] TASK 2.6-2.10: `.venv312/` Python 3.12.16 đã cài PyTorch, Transformers, scikit-learn, pandas, numpy, matplotlib, seaborn và Drain3. PyTorch MPS khả dụng; CUDA không khả dụng trên macOS.
+- [x] TASK 2.11-2.14: Chương 3 bản nháp và PDF draft v3 đã compile.

@@ -1,0 +1,37 @@
+\chapter{Cơ sở lý thuyết và tổng quan nghiên cứu}
+
+\section{Dữ liệu log hệ thống}
+Log hệ thống là chuỗi bản ghi mô tả trạng thái, hành vi hoặc sự kiện của phần
+mềm và hạ tầng. Một bản ghi thường chứa timestamp, mức severity, component,
+message và tham số thay đổi.
+
+\subsection{Đặc điểm của log}
+Log bán cấu trúc, phi dừng, có dung lượng lớn và mất cân bằng lớp. Template có
+thể thay đổi khi phần mềm phát triển; một template chưa từng thấy không tự động
+là bất thường. Nhãn có thể gắn với một dòng, block hoặc cửa sổ thời gian.
+
+\subsection{Log parsing bằng Drain}
+Drain chuyển message thô thành template ổn định bằng cây có độ sâu cố định,
+ngưỡng tương đồng và cơ chế masking tham số. Template giúp gom các log cùng cấu
+trúc thành event ID. Lỗi parser có thể lan truyền sang biểu diễn và mô hình
+phát hiện.
+
+\subsection{Gom nhóm log}
+Log được gom theo block/session, fixed-size window, sliding window hoặc trace.
+HDFS\_v1 gom theo block ID, trong khi BGL có thể gom theo timestamp hoặc đánh
+giá ở cấp dòng tùy giao thức.
+
+\section{Bộ dữ liệu nghiên cứu}
+\subsection{LogHub}
+LogHub là bộ dữ liệu công khai tổng hợp nhiều log hệ thống và cung cấp tài
+nguyên cho nghiên cứu phân tích log.
+
+\subsection{HDFS\_v1}
+HDFS\_v1 chứa 11.175.629 dòng log thô. Nhãn được gắn ở cấp block thông qua
+\texttt{anomaly\_label.csv}: 558.223 block Normal và 16.838 block Anomaly.
+Tổng số block là 575.061.
+
+\subsection{BGL}
+BGL chứa 4.747.963 dòng log thô trong dữ liệu tải về. File raw hiện không
+cung cấp ground-truth label theo từng dòng. Do đó nghiên cứu cần thêm nguồn
+nhãn chuẩn trước khi tính chỉ số đánh giá BGL.

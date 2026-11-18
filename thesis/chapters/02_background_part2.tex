@@ -1,0 +1,37 @@
+\section{Phát hiện bất thường trên dữ liệu log}
+
+\subsection{Định nghĩa và phân loại}
+Anomaly là sai lệch dữ liệu; fault là nguyên nhân tiềm ẩn; failure là sự kiện
+vận hành có thể quan sát. Bất thường điểm liên quan tới một bản ghi, bất thường
+tập thể liên quan tới chuỗi hoặc block, còn bất thường ngữ cảnh phụ thuộc
+ngữ cảnh xung quanh.
+
+\subsection{Các hướng tiếp cận}
+Phương pháp giám sát cần nhãn train, bán giám sát chủ yếu học từ dữ liệu
+bình thường, còn không giám sát không dùng nhãn huấn luyện. Với HDFS\_v1,
+nhãn block cho phép giám sát ở mức block. BGL raw chưa gắn nhãn trong dữ liệu
+hiện tại nên cần ground-truth riêng trước khi huấn luyện đánh giá giám sát.
+
+\subsection{Học máy cổ điển}
+KNN phát hiện trường hợp gần nhất theo không gian đặc trưng. Decision Tree
+chia dữ liệu bằng các ngưỡng dễ kiểm tra. SLFN học biểu diễn phi tuyến nông.
+LightAD là đại diện của họ này. Ưu điểm là chi phí thấp và triển khai đơn giản;
+nhược điểm là phụ thuộc biểu diễn log và nhãn.
+
+\subsection{Học sâu và Transformer}
+LSTM mô hình hóa chuỗi event và quan hệ trước--sau. Transformer dùng attention
+để học quan hệ dài hạn. LogFormer tiền huấn luyện Transformer rồi tinh chỉnh
+adapter cho phát hiện bất thường. Hạn chế gồm chi phí GPU, dữ liệu huấn luyện
+và độ nhạy parser.
+
+\subsection{LLM kết hợp RAG}
+LLM có thể đánh giá ngữ nghĩa log và giải thích quyết định. RAG truy xuất các
+trường hợp liên quan để làm ngữ cảnh trước khi suy luận. LogRAG kết hợp
+DeepSVDD cho ứng viên bất thường rồi dùng RAG/LLM tái đánh giá. Hạn chế gồm
+độ trễ, chi phí API, tính không xác định và chất lượng retrieval.
+
+\subsection{Chỉ số đánh giá}
+Precision đo tỷ lệ cảnh báo đúng trong tổng cảnh báo. Recall đo tỷ lệ bất
+thường được phát hiện. F1 cân bằng Precision và Recall. PR-AUC đặc biệt phù
+hợp cho dữ liệu mất cân bằng. FPR đo tỷ lệ false alarm trên số mẫu bình
+thường. Accuracy không nên là chỉ số chính cho HDFS\_v1/BGL.
