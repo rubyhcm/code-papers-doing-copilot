@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kế hoạch thực hiện Luận văn Thạc sĩ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: #e8e8e8;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+      color: #1a1a1a;
+    }
+
+    .page {
+      background: #ffffff;
+      width: 860px;
+      padding: 48px 52px 52px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+    }
+
+    /* ── HEADER ── */
+    .title-block {
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .title-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .title-main {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+    .title-en {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 13px;
+      font-weight: 400;
+      font-style: italic;
+      color: #555;
+    }
+    .meta-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 28px;
+      font-size: 11.5px;
+      color: #666;
+    }
+    .meta-row span { white-space: nowrap; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 14px;
+    }
+
+    /* ── LEGEND ── */
+    .legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      color: #444;
+    }
+    .legend-swatch {
+      width: 20px;
+      height: 10px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .swatch-full    { background: #1a1a1a; }
+    .swatch-partial { background: #888; }
+    .swatch-prep    { background: #c8c8c8; }
+
+    /* ── TABLE ── */
+    .gantt {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    /* header row */
+    .gantt thead tr th {
+      font-size: 11px;
+      font-weight: 600;
+      color: #333;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid #1a1a1a;
+      text-align: center;
+    }
+    .gantt thead tr th.th-task {
+      text-align: left;
+      padding-left: 0;
+      width: 230px;
+    }
+    .gantt thead tr th.th-month { width: 88px; }
+
+    .th-month-num   { font-size: 12px; font-weight: 600; color: #1a1a1a; }
+    .th-month-label { font-size: 10px; font-weight: 400; color: #888; }
+
+    /* body rows */
+    .gantt tbody tr {
+      border-bottom: 1px solid #ebebeb;
+    }
+    .gantt tbody tr:last-child { border-bottom: none; }
+
+    /* separator row */
+    .gantt tbody tr.group-sep td {
+      padding: 0;
+      height: 6px;
+      border-bottom: none;
+    }
+    .gantt tbody tr.group-label td {
+      padding: 12px 0 4px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #999;
+      border-bottom: 1px dashed #ddd;
+    }
+
+    .td-task {
+      padding: 11px 0;
+      vertical-align: middle;
+    }
+    .task-name {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1.3;
+    }
+    .task-detail {
+      font-size: 10.5px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .td-month {
+      padding: 8px 6px;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    /* bars */
+    .bar {
+      height: 22px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .bar-label {
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .bar-full    { background: #1a1a1a; }
+    .bar-full    .bar-label { color: #fff; }
+
+    .bar-partial { background: #777; }
+    .bar-partial .bar-label { color: #fff; }
+
+    .bar-prep    { background: #d0d0d0; }
+    .bar-prep    .bar-label { color: #555; }
+
+    .bar-empty {
+      height: 22px;
+      background: transparent;
+    }
+
+    /* milestone dot */
+    .milestone-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+    }
+    .milestone-diamond {
+      width: 14px; height: 14px;
+      background: #1a1a1a;
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    /* ── MILESTONE TABLE ── */
+    .deliverables {
+      margin-top: 28px;
+      border-top: 1.5px solid #1a1a1a;
+      padding-top: 18px;
+    }
+    .deliverables-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .del-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+    .del-table th {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #888;
+      text-align: left;
+      padding: 0 0 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .del-table td {
+      padding: 9px 0 9px;
+      border-bottom: 1px solid #ebebeb;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .del-table tr:last-child td { border-bottom: none; }
+    .del-table td:first-child {
+      width: 56px;
+      font-weight: 600;
+      color: #1a1a1a;
+      white-space: nowrap;
+    }
+    .del-table td:nth-child(2) {
+      width: 180px;
+      padding-right: 16px;
+      font-weight: 500;
+      color: #222;
+    }
+    .del-table td:nth-child(3) {
+      color: #555;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #aaa;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page { box-shadow: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="title-block">
+    <div class="title-label">Luận văn Thạc sĩ · Trường ĐH Công nghệ Thông tin – ĐHQG TP.HCM</div>
+    <div class="title-main">Đánh giá thực nghiệm các phương pháp phát hiện bất thường dựa trên dữ liệu log:<br>Từ học máy cổ điển đến mô hình ngôn ngữ lớn</div>
+    <div class="title-en">An Empirical Evaluation of Log-Based Anomaly Detection Methods: From Classical Machine Learning to Large Language Models</div>
+    <div class="meta-row">
+      <span>Thời gian: 6 tháng</span>
+      <span>Phương pháp: 3 (LightAD · LogFormer · LogRAG)</span>
+      <span>Bộ dữ liệu: 2 (HDFS_v3 · BGL)</span>
+      <span>Cấu hình: 6 (3 phương pháp × 2 dataset)</span>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-swatch swatch-full"></div>
+      Hoạt động chính
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch swatch-partial"></div>
+      Hoạt động phụ / song song
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch swatch-prep"></div>
+      Chuẩn bị / khởi động
+    </div>
+    <div class="legend-item">
+      <div style="width:14px;height:14px;background:#1a1a1a;transform:rotate(45deg);flex-shrink:0;"></div>
+      &nbsp;&nbsp;Cột mốc hoàn thành
+    </div>
+  </div>
+
+  <!-- GANTT -->
+  <table class="gantt">
+    <thead>
+      <tr>
+        <th class="th-task">Nội dung công việc</th>
+        <th class="th-month"><div class="th-month-num">T1</div><div class="th-month-label">Tháng 1</div></th>
+        <th class="th-month"><div class="th-month-num">T2</div><div class="th-month-label">Tháng 2</div></th>
+        <th class="th-month"><div class="th-month-num">T3</div><div class="th-month-label">Tháng 3</div></th>
+        <th class="th-month"><div class="th-month-num">T4</div><div class="th-month-label">Tháng 4</div></th>
+        <th class="th-month"><div class="th-month-num">T5</div><div class="th-month-label">Tháng 5</div></th>
+        <th class="th-month"><div class="th-month-num">T6</div><div class="th-month-label">Tháng 6</div></th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- GROUP 1 -->
+      <tr class="group-label"><td colspan="7">Nội dung 1 — Dữ liệu log &amp; Phân tích log hiệu quả</td></tr>
+
+      <tr>
+        <td class="td-task">
+          <div class="task-name">Khảo sát bản chất log &amp; Tổng quan tài liệu</div>
+          <div class="task-detail">Dữ liệu bán cấu trúc, phi dừng · Tổng quan ≥30 bài báo</div>
+        </td>
+        <td class="td-month"><div class="bar bar-full"><span class="bar-label">Chính</span></div></td>
+        <td class="td-month"><div class="bar bar-prep"><span class="bar-label">Bổ sung</span></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+      </tr>
+
+      <tr>
+        <td class="td-task">
+          <div class="task-name">Thu thập dữ liệu &amp; Pipeline tiền xử lý log</div>
+          <div class="task-detail">HDFS_v3 &amp; BGL từ LogHub · Drain parsing · Block/Window grouping</div>
+        </td>
+        <td class="td-month"><div class="bar bar-full"><span class="bar-label">Chính</span></div></td>
+        <td class="td-month"><div class="bar bar-partial"><span class="bar-label">Hoàn tất</span></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+      </tr>
+
+      <!-- GROUP 2 -->
+      <tr class="group-label"><td colspan="7">Nội dung 2 — Khung khái niệm phát hiện bất thường trên log</td></tr>
+
+      <tr>
+        <td class="td-task">
+          <div class="task-name">Khái niệm &amp; Phân loại bất thường trên log</div>
+          <div class="task-detail">Anomaly vs. Fault vs. Failure · Point, Collective, Contextual</div>
+        </td>
+        <td class="td-month"><div class="bar bar-prep"><span class="bar-label">Chuẩn bị</span></div></td>
+        <td class="td-month"><div class="bar bar-full"><span class="bar-label">Chính</span></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+      </tr>
+
+      <tr>
+        <td class="td-task">
+          <div class="task-name">Hệ thống hóa taxonomy &amp; Môi trường thực nghiệm</div>
+          <div class="task-detail">3 họ kỹ thuật (ML, Transformer, LLM-RAG) · Thiết lập PyTorch &amp; LLM</div>
+        </td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-full"><span class="bar-label">Chính</span></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+      </tr>
+
+      <!-- GROUP 3 -->
+      <tr class="group-label"><td colspan="7">Nội dung 3 — Đánh giá thực nghiệm 3 phương pháp (Benchmark)</td></tr>
+
+      <tr>
+        <td class="td-task">
+          <div class="task-name">Tái lập 3 baseline &amp; Tích hợp pipeline</div>
+          <div class="task-detail">LightAD · LogFormer · LogRAG · Mở rộng HDFS_v3 · Chạy sơ bộ 6 cấu hình</div>
+        </td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-full"><span class="bar-label">Chính</span></div></td>
+        <td class="td-month"><div class="bar-prep"><span class="bar-label">Kiểm tra</span></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+      </tr>
+
+      <tr>
+        <td class="td-task">
+          <div class="task-name">Benchmark chính thức — RQ1 &amp; RQ2</div>
+          <div class="task-detail">P / R / F1 / PR-AUC / FPR · Chi phí tính toán (độ trễ, RAM/GPU)</div>
+        </td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-full"><span class="bar-label">Chính</span></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+      </tr>
+
+      <tr>
+        <td class="td-task">
+          <div class="task-name">Phân tích sâu — RQ3 &amp; RQ4 &amp; Khuyến nghị</div>
+          <div class="task-detail">Pareto trade-off · Phân loại lỗi FP/FN (50–100 mẫu) · Giải thích &amp; Cây quyết định</div>
+        </td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-prep"><span class="bar-label">Sơ bộ</span></div></td>
+        <td class="td-month"><div class="bar-full"><span class="bar-label">Chính</span></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+      </tr>
+
+      <!-- GROUP 4 -->
+      <tr class="group-label"><td colspan="7">Hoàn thiện — Viết luận văn &amp; Bảo vệ</td></tr>
+
+      <tr>
+        <td class="td-task">
+          <div class="task-name">Viết luận văn (bản nháp liên tục)</div>
+          <div class="task-detail">Chương 1–2 (T1–T2) · Chương 3 (T3) · Chương 4–5 (T4–T5)</div>
+        </td>
+        <td class="td-month"><div class="bar-prep"><span class="bar-label">Ch. 1–2</span></div></td>
+        <td class="td-month"><div class="bar-prep"><span class="bar-label">Ch. 1–2</span></div></td>
+        <td class="td-month"><div class="bar-prep"><span class="bar-label">Ch. 3</span></div></td>
+        <td class="td-month"><div class="bar-partial"><span class="bar-label">Ch. 4–5</span></div></td>
+        <td class="td-month"><div class="bar-partial"><span class="bar-label">Ch. 4–5</span></div></td>
+        <td class="td-month"><div class="bar-full"><span class="bar-label">Hoàn thiện</span></div></td>
+      </tr>
+
+      <tr>
+        <td class="td-task">
+          <div class="task-name">Đóng gói mã nguồn &amp; Chuẩn bị bảo vệ</div>
+          <div class="task-detail">Reproducibility package · Slide thuyết trình · Nộp luận văn</div>
+        </td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-empty"></div></td>
+        <td class="td-month"><div class="bar-prep"><span class="bar-label">Chuẩn bị</span></div></td>
+        <td class="td-month">
+          <div class="milestone-cell">
+            <div class="milestone-diamond"></div>
+          </div>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <!-- DELIVERABLES -->
+  <div class="deliverables">
+    <div class="deliverables-title">Sản phẩm dự kiến theo các mốc thời gian</div>
+    <table class="del-table">
+      <thead>
+        <tr>
+          <th>Thời điểm</th>
+          <th>Sản phẩm</th>
+          <th>Điều kiện hoàn thành</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Cuối T1</td>
+          <td>Dữ liệu log &amp; Tiền xử lý</td>
+          <td>Bảng tổng quan tài liệu · Bảng thống kê đặc điểm 2 dataset · Pipeline Drain parsing · Bản nháp Chương 1–2</td>
+        </tr>
+        <tr>
+          <td>Cuối T2</td>
+          <td>Khung khái niệm &amp; Taxonomy</td>
+          <td>Bảng taxonomy phát hiện bất thường · Khung khái niệm (anomaly/fault/failure) · Môi trường sẵn sàng · Bản nháp Chương 3</td>
+        </tr>
+        <tr>
+          <td>Cuối T3</td>
+          <td>Tái lập 3 phương pháp</td>
+          <td>3 baselines chạy được · Pipeline tích hợp LogRAG trên HDFS_v3 · Ma trận 3×2 chạy sơ bộ · Reproduction Report</td>
+        </tr>
+        <tr>
+          <td>Cuối T4</td>
+          <td>Benchmark RQ1 &amp; RQ2</td>
+          <td>Bảng số liệu benchmark RQ1 (P/R/F1/PR-AUC/FPR) · Bảng chi phí tính toán RQ2 (độ trễ, RAM/VRAM) · Biểu đồ visualizations</td>
+        </tr>
+        <tr>
+          <td>Cuối T5</td>
+          <td>Phân tích RQ3 &amp; RQ4 &amp; Khuyến nghị</td>
+          <td>Biểu đồ Pareto trade-off · Báo cáo phân loại lỗi FP/FN (50–100 mẫu) · Đánh giá khả năng giải thích · Cây quyết định · Bản nháp Chương 4–5</td>
+        </tr>
+        <tr>
+          <td>Cuối T6</td>
+          <td>Luận văn hoàn chỉnh &amp; Bảo vệ</td>
+          <td>Toàn văn luận văn hoàn chỉnh · Repository mã nguồn mở (reproducibility package) · Slide và báo cáo bảo vệ</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>Trường Đại học Công nghệ Thông tin – ĐHQG TP.HCM</span>
+    <span>Thời gian thực hiện: 6 tháng</span>
+  </div>
+
+</div>
+</body>
+</html>

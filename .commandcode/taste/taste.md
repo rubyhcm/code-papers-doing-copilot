@@ -1,0 +1,8 @@
+- Giao tiếp bằng tiếng Việt và mong muốn nhận phản hồi bằng tiếng Việt. Confidence: 0.8
+- Muốn kết quả bám sát source code và tài liệu thực tế trong dự án, không trả lời chung chung. Confidence: 0.8
+- Khi phạm vi đánh giá chưa đầy đủ, ưu tiên mở rộng mã nguồn/pipeline để đạt so sánh toàn diện (đủ method × dataset) thay vì thu hẹp phạm vi hay thay thế dữ liệu. Confidence: 0.55
+- Chỉ đưa vào so sánh những công trình đã công bố chính thức (peer-reviewed); loại bỏ phương pháp chỉ là bản preprint. Confidence: 0.8
+- Quan tâm tới chất lượng thẩm mỹ của biểu đồ/hình ảnh — muốn biểu đồ đẹp, trình bày chuyên nghiệp để đưa vào tài liệu học thuật (đề cương/luận văn). Confidence: 0.6
+- Khi kiểm tra/đánh giá một phần tài liệu, muốn đối chiếu chéo nhiều tài liệu liên quan để phát hiện mâu thuẫn và đảm bảo nhất quán. Confidence: 0.6
+- Khi đã chấp nhận đề xuất, người dùng thường ra lệnh ngắn gọn (vd: "hãy update lại") và mong trợ lý tự áp dụng chỉnh sửa trực tiếp vào file thay vì chỉ dừng ở mức đề xuất. Confidence: 0.6
+- Khi phải chọn giữa tái lập trung thực mã nguồn gốc và chuẩn hóa/ghi đè (vd: seed chung), ưu tiên tái lập trung thực — giữ nguyên giá trị gốc của từng phương pháp và ghi chú rõ ngoại lệ thay vì ép về một giá trị chung. Confidence: 0.7
