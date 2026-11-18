@@ -10,7 +10,7 @@
 ### Research Context
 - **Đề tài:** Đánh giá thực nghiệm các phương pháp phát hiện bất thường dựa trên log
 - **3 Phương pháp:** LightAD (ML cổ điển), LogFormer (Transformer), LogRAG (LLM+RAG)
-- **2 Datasets:** HDFS_v3, BGL từ LogHub
+- **2 Datasets:** HDFS_v1, BGL từ LogHub
 - **4 RQ:** Hiệu quả (RQ1), Chi phí (RQ2), Trade-off (RQ3), Explainability (RQ4)
 - **Timeline:** 6 tháng (01/2027 - 06/2027)
 
@@ -32,7 +32,7 @@
 **Data & Tools:**
 4. **LogHub:** Zhu et al. (2023). "A Data Collection for Evaluating Log Parsers." ISSRE 2023.
    - Website: `https://github.com/logpai/loghub`
-   - HDFS_v3: `https://zenodo.org/record/8196385`
+   - HDFS_v1: `https://zenodo.org/record/8196385`
    - BGL: `https://zenodo.org/record/8196385`
 
 5. **Drain Parser:** He et al. (2017). "Drain: An Online Log Parsing Approach with Fixed Depth Tree." ICWS 2017.
@@ -204,17 +204,17 @@ _Tương ứng với T1 trong đề cương_
 
 **Input:**
 - LogHub Zenodo: `https://zenodo.org/record/8196385`
-- Datasets needed: HDFS_v3, BGL
+- Datasets needed: HDFS_v1, BGL
 
 **Actions:**
 ```bash
 # Create data directory
-mkdir -p data/raw/{hdfs_v3,bgl}
+mkdir -p data/raw/{hdfs_v1,bgl}
 
-# Download HDFS_v3
-cd data/raw/hdfs_v3
-wget https://zenodo.org/record/8196385/files/HDFS_v3.tar.gz
-tar -xzf HDFS_v3.tar.gz
+# Download HDFS_v1
+cd data/raw/hdfs_v1
+wget https://zenodo.org/record/8196385/files/HDFS_v1.tar.gz
+tar -xzf HDFS_v1.tar.gz
 
 # Download BGL  
 cd ../bgl
@@ -226,7 +226,7 @@ sha256sum -c checksums.txt
 ```
 
 **Output:** 
-- `data/raw/hdfs_v3/` (expected: ~2.7 GB, 14.8M lines)
+- `data/raw/hdfs_v1/` (expected: ~2.7 GB, 14.8M lines)
 - `data/raw/bgl/` (expected: ~1.8 GB, 4.7M lines)
 - `data/README.md` (documentation)
 
@@ -288,9 +288,9 @@ def parse_logs(input_file, output_file, dataset_name):
         } for c in templates], f, indent=2)
 
 if __name__ == '__main__':
-    # HDFS_v3
-    parse_logs('data/raw/hdfs_v3/HDFS.log', 
-               'data/parsed/hdfs_v3_structured.jsonl',
+    # HDFS_v1
+    parse_logs('data/raw/hdfs_v1/HDFS.log', 
+               'data/parsed/hdfs_v1_structured.jsonl',
                'hdfs')
     
     # BGL
@@ -306,8 +306,8 @@ python scripts/parse_logs.py
 ```
 
 **Output:**
-- `data/parsed/hdfs_v3_structured.jsonl`
-- `data/parsed/hdfs_v3_structured.jsonl.templates.json`
+- `data/parsed/hdfs_v1_structured.jsonl`
+- `data/parsed/hdfs_v1_structured.jsonl.templates.json`
 - `data/parsed/bgl_structured.jsonl`
 - `data/parsed/bgl_structured.jsonl.templates.json`
 - `scripts/parse_logs.py`
@@ -363,9 +363,9 @@ def analyze_dataset(parsed_file, label_file, dataset_name):
 
 # Run for both datasets
 hdfs_stats, hdfs_templates, hdfs_anomalies = analyze_dataset(
-    'data/parsed/hdfs_v3_structured.jsonl',
-    'data/raw/hdfs_v3/labels.csv',
-    'HDFS_v3'
+    'data/parsed/hdfs_v1_structured.jsonl',
+    'data/raw/hdfs_v1/preprocessed/anomaly_label.csv',
+    'HDFS_v1'
 )
 
 bgl_stats, bgl_templates, bgl_anomalies = analyze_dataset(
@@ -376,7 +376,7 @@ bgl_stats, bgl_templates, bgl_anomalies = analyze_dataset(
 
 # Save analysis
 with open('analysis/dataset_statistics.json', 'w') as f:
-    json.dump({'hdfs_v3': hdfs_stats, 'bgl': bgl_stats}, f, indent=2)
+    json.dump({'hdfs_v1': hdfs_stats, 'bgl': bgl_stats}, f, indent=2)
 ```
 
 **Output:**
@@ -387,7 +387,7 @@ with open('analysis/dataset_statistics.json', 'w') as f:
 
 **Table format:**
 ```markdown
-| Characteristic | HDFS_v3 | BGL |
+| Characteristic | HDFS_v1 | BGL |
 |---|---|---|
 | Total log lines | 14,855,160 | 4,747,963 |
 | Unique templates | ~150 | ~380 |
@@ -414,7 +414,7 @@ with open('analysis/dataset_statistics.json', 'w') as f:
 
 **Actions:**
 1. Create detailed comparison:
-   - **HDFS_v3:** Hadoop distributed filesystem logs, fault injection study, session-based (block ID), structured labeling
+   - **HDFS_v1:** Hadoop distributed filesystem logs, fault injection study, session-based (block ID), structured labeling
    - **BGL:** BlueGene/L supercomputer, natural errors, time-based windows, alert-based labeling
 2. Document implications for experiments:
    - Different anomaly semantics
@@ -440,7 +440,7 @@ with open('analysis/dataset_statistics.json', 'w') as f:
 
 **Actions:**
 Create formal RQ document with:
-- **RQ1 (Hiệu quả):** What is the detection effectiveness (P/R/F1/PR-AUC/FPR) of LightAD, LogFormer, and LogRAG on HDFS_v3 and BGL?
+- **RQ1 (Hiệu quả):** What is the detection effectiveness (P/R/F1/PR-AUC/FPR) of LightAD, LogFormer, and LogRAG on HDFS_v1 and BGL?
 - **RQ2 (Chi phí):** What are the computational costs (training time, inference latency, memory) of each method?
 - **RQ3 (Trade-off):** What are the Pareto trade-offs between detection effectiveness and computational cost?
 - **RQ4 (Explainability):** What error patterns (FP/FN) do the methods exhibit, and how explainable are their predictions?
@@ -484,7 +484,7 @@ For each RQ:
      - 2.1.3 Session grouping
    - 2.2 Bộ dữ liệu nghiên cứu
      - 2.2.1 LogHub
-     - 2.2.2 HDFS_v3
+     - 2.2.2 HDFS_v1
      - 2.2.3 BGL
 
 **Output:**
@@ -542,7 +542,7 @@ For each RQ:
 - [ ] `literature/02_papers.bib`
 - [ ] `literature/03_log_data_characteristics.md`
 - [ ] `methodology/04_empirical_standards_checklist.md`
-- [ ] `data/raw/hdfs_v3/`, `data/raw/bgl/` (datasets)
+- [ ] `data/raw/hdfs_v1/`, `data/raw/bgl/` (datasets)
 - [ ] `data/parsed/*_structured.jsonl` (parsed logs)
 - [ ] `scripts/parse_logs.py`
 - [ ] `analysis/dataset_statistics.json`
@@ -1027,7 +1027,7 @@ def convert_to_lightad(parsed_jsonl, output_csv, dataset_name):
     
     df.to_csv(output_csv, index=False)
 
-convert_to_lightad('../../data/parsed/hdfs_v3_structured.jsonl',
+convert_to_lightad('../../data/parsed/hdfs_v1_structured.jsonl',
                    'data/hdfs_processed.csv', 'hdfs')
 convert_to_lightad('../../data/parsed/bgl_structured.jsonl',
                    'data/bgl_processed.csv', 'bgl')
@@ -1268,8 +1268,8 @@ if __name__ == '__main__':
     import os
     os.makedirs('data/splits', exist_ok=True)
     
-    split_hdfs('data/parsed/hdfs_v3_structured.jsonl',
-               'data/raw/hdfs_v3/labels.csv',
+    split_hdfs('data/parsed/hdfs_v1_structured.jsonl',
+               'data/raw/hdfs_v1/preprocessed/anomaly_label.csv',
                'data/splits')
     
     split_bgl('data/parsed/bgl_structured.jsonl',
@@ -1456,11 +1456,11 @@ if __name__ == '__main__':
 
 ---
 
-### 📋 TASK 3.7: Mở rộng LogRAG cho HDFS_v3
+### 📋 TASK 3.7: Mở rộng LogRAG cho HDFS_v1
 
 **Input:**
 - `repos/LogRAG/` (working on BGL from task 3.4)
-- HDFS_v3 parsed data
+- HDFS_v1 parsed data
 - LogRAG paper architecture
 
 **Actions:**
@@ -1471,7 +1471,7 @@ cd repos/LogRAG
 # Create HDFS adapter
 cat > adapt_hdfs.py << 'EOF'
 """
-Adapt LogRAG for HDFS_v3 dataset
+Adapt LogRAG for HDFS_v1 dataset
 Key difference: Block-based grouping instead of time windows
 """
 import pandas as pd
@@ -1514,8 +1514,8 @@ def create_hdfs_sessions(parsed_jsonl, labels_csv, output_file):
     print(f"Anomaly rate: {sum(s['label'] for s in sessions) / len(sessions):.3%}")
 
 create_hdfs_sessions(
-    '../../data/parsed/hdfs_v3_structured.jsonl',
-    '../../data/raw/hdfs_v3/labels.csv',
+    '../../data/parsed/hdfs_v1_structured.jsonl',
+    '../../data/raw/hdfs_v1/preprocessed/anomaly_label.csv',
     'data/hdfs_sessions.jsonl'
 )
 EOF
@@ -3324,7 +3324,7 @@ cat > 06_conclusion.tex << 'EOF'
 \section{Hạn chế}
 % Honest discussion of limitations:
 % - Limited to 3 methods, 2 datasets
-% - HDFS_v3 extension for LogRAG is our adaptation
+% - HDFS_v1 extension for LogRAG is our adaptation
 % - API costs may vary
 % - Specific to log anomaly detection (not general anomaly detection)
 
@@ -3372,7 +3372,7 @@ bibtex thesis
 # Task 6.10: Appendices
 cat > appendices/appendix_a_datasets.tex << 'EOF'
 \chapter{Appendix A: Dataset Details}
-\section{HDFS_v3}
+\section{HDFS_v1}
 % Detailed statistics, sample logs
 
 \section{BGL}

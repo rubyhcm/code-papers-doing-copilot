@@ -38,7 +38,7 @@ Mỗi phương pháp thường được công bố với bộ dữ liệu, giao 
 1. **Thiếu giao thức đánh giá thống nhất:** Các nghiên cứu dùng cách chia dữ liệu, cách tính chỉ số và cách xử lý nhãn khác nhau.
 2. **Chưa có benchmark đa họ kỹ thuật:** Chưa có đánh giá nào đặt **đồng thời cả ba họ kỹ thuật chủ đạo** (ML cổ điển siêu nhẹ, Transformer, LLM+RAG) lên cùng một benchmark thống nhất.
 3. **Chưa so sánh chi phí tính toán công bằng:** Đánh đổi giữa chi phí LLM/RAG (LogRAG) so với phương pháp nhẹ (LightAD) chưa được làm rõ trong cùng điều kiện phần cứng.
-4. **Độ ổn định giữa các bộ dữ liệu:** Chưa rõ phương pháp tốt trên HDFS có ổn định trên BGL hay không, đặc biệt khi so sánh fault injection có kiểm soát (HDFS_v3) với lỗi tự nhiên production (BGL).
+4. **Độ ổn định giữa các bộ dữ liệu:** Chưa rõ phương pháp tốt trên HDFS có ổn định trên BGL hay không, đặc biệt khi so sánh fault injection có kiểm soát (HDFS_v1) với lỗi tự nhiên production (BGL).
 5. **Thiếu phân tích lỗi có cấu trúc:** Chưa có phân tích FP/FN đặc trưng của từng phương pháp, chưa làm rõ kiểu lỗi nào phổ biến với ML cổ điển, Transformer hay LLM+RAG.
 
 ### 1.3. Ý nghĩa khoa học và thực tiễn
@@ -54,28 +54,28 @@ Mỗi phương pháp thường được công bố với bộ dữ liệu, giao 
 ### 1.4. Mục tiêu nghiên cứu
 
 **Mục tiêu tổng quát:**
-Đánh giá một cách có hệ thống và công bằng hiệu quả phát hiện bất thường, chi phí tính toán, tính ổn định và khả năng giải thích của ba phương pháp LogAD đại diện cho ba họ kỹ thuật chủ đạo (ML cổ điển, Transformer, LLM+RAG), trên hai bộ dữ liệu log chuẩn (HDFS_v3, BGL), trong một giao thức thực nghiệm mô tả rõ và có thể tái lập.
+Đánh giá một cách có hệ thống và công bằng hiệu quả phát hiện bất thường, chi phí tính toán, tính ổn định và khả năng giải thích của ba phương pháp LogAD đại diện cho ba họ kỹ thuật chủ đạo (ML cổ điển, Transformer, LLM+RAG), trên hai bộ dữ liệu log chuẩn (HDFS_v1, BGL), trong một giao thức thực nghiệm mô tả rõ và có thể tái lập.
 
 **Mục tiêu cụ thể:**
 
 1. **Hệ thống hóa kiến thức nền tảng:** Làm rõ bản chất, cấu trúc và thách thức của dữ liệu log; tổng hợp pipeline phân tích log (parsing, biểu diễn, nhóm phiên); xác lập khung khái niệm phát hiện bất thường trên log.
-2. **Tái lập và chuẩn hóa:** Tái lập thành công mã nguồn của ba phương pháp (LightAD — ML cổ điển, LogFormer — Transformer, LogRAG — LLM+RAG) trong môi trường chung; xây dựng pipeline tiền xử lý và đánh giá thống nhất cho HDFS_v3 và BGL.
+2. **Tái lập và chuẩn hóa:** Tái lập thành công mã nguồn của ba phương pháp (LightAD — ML cổ điển, LogFormer — Transformer, LogRAG — LLM+RAG) trong môi trường chung; xây dựng pipeline tiền xử lý và đánh giá thống nhất cho HDFS_v1 và BGL.
 3. **Đánh giá đa chiều:** Đo lường và so sánh hiệu quả phát hiện (P/R/F1/PR-AUC) và chi phí tính toán (thời gian huấn luyện, độ trễ suy luận, bộ nhớ).
-4. **Phân tích chuyên sâu:** Phân tích độ ổn định giữa HDFS_v3 (fault injection) và BGL (lỗi tự nhiên); phân tích lỗi có cấu trúc (FP/FN); đánh giá khả năng giải thích.
+4. **Phân tích chuyên sâu:** Phân tích độ ổn định giữa HDFS_v1 (fault injection) và BGL (lỗi tự nhiên); phân tích lỗi có cấu trúc (FP/FN); đánh giá khả năng giải thích.
 5. **Khuyến nghị thực tiễn:** Rút ra cẩm nang lựa chọn phương pháp theo điều kiện triển khai (tài nguyên, độ trễ, khả năng giải thích).
 
 ### 1.5. Câu hỏi nghiên cứu (Research Questions)
 
 | RQ | Nội dung | Mục đích |
 |---|---|---|
-| **RQ1** | Ba phương pháp đạt Precision, Recall, F1, PR-AUC như thế nào trên HDFS_v3 và BGL khi đánh giá theo cùng một giao thức? | Xác lập baseline so sánh công bằng |
-| **RQ2** | Thứ hạng và hiệu quả có thay đổi giữa HDFS_v3 (fault injection) và BGL (lỗi tự nhiên)? Phương pháp nào ổn định nhất? | Đánh giá khả năng tổng quát hóa và ổn định |
+| **RQ1** | Ba phương pháp đạt Precision, Recall, F1, PR-AUC như thế nào trên HDFS_v1 và BGL khi đánh giá theo cùng một giao thức? | Xác lập baseline so sánh công bằng |
+| **RQ2** | Thứ hạng và hiệu quả có thay đổi giữa HDFS_v1 (fault injection) và BGL (lỗi tự nhiên)? Phương pháp nào ổn định nhất? | Đánh giá khả năng tổng quát hóa và ổn định |
 | **RQ3** | Đánh đổi giữa độ chính xác và chi phí tính toán (thời gian huấn luyện, độ trễ suy luận, bộ nhớ) như thế nào? | So sánh ML nhẹ vs. Transformer vs. LLM+RAG |
 | **RQ4** | Kiểu trường hợp nào thường bị bỏ sót (FN) hoặc gây cảnh báo sai (FP)? Phương pháp nào hỗ trợ giải thích quyết định tốt nhất? | Hiểu cơ chế thất bại, đánh giá khả năng giải thích |
 
 ### 1.6. Phạm vi và giả định
 
-- **Trong phạm vi:** 3 phương pháp đại diện (LightAD — ML cổ điển, LogFormer — Transformer, LogRAG — LLM+RAG); 2 bộ dữ liệu chuẩn (HDFS_v3, BGL) từ LogHub
+- **Trong phạm vi:** 3 phương pháp đại diện (LightAD — ML cổ điển, LogFormer — Transformer, LogRAG — LLM+RAG); 2 bộ dữ liệu chuẩn (HDFS_v1, BGL) từ LogHub
 - **Ngoài phạm vi:** Không đề xuất thuật toán mới; không so sánh số liệu từ bài báo gốc mà không tái lập; không tinh chỉnh mô hình bằng tập kiểm thử; không đánh giá phương pháp không có mã nguồn; không bao gồm các phương pháp GNN, Transformer đa phương thức, và thống kê nâng cao (sẽ là hướng mở rộng tương lai)
 
 ### 1.7. Đóng góp dự kiến
@@ -145,7 +145,7 @@ Raw Logs → Log Parsing → Log Grouping → Feature Extraction → Anomaly Det
 - **Ý tưởng:** Pipeline hai giai đoạn: (1) Pre-train trên log không nhãn bằng masked prediction, (2) Adapter tuning (chỉ fine-tune adapter + classifier, đóng băng backbone)
 - **Chế độ huấn luyện:** `train_adapter()` (adapter + norm layers), `train_classifier()` (chỉ FC layer cuối)
 - **Tiền xử lý:** Drain parsing → Sentence embedding (768d)
-- **Dữ liệu hỗ trợ:** LogHub (HDFS, BGL, Thunderbird, Spirit, OpenStack, …) — hỗ trợ sẵn HDFS_v3 và BGL
+- **Dữ liệu hỗ trợ:** LogHub (HDFS, BGL, Thunderbird, Spirit, OpenStack, …) — hỗ trợ sẵn HDFS_v1 và BGL
 - **Ưu điểm:** Khai thác ngữ cảnh tuần tự; pre-train giúp học biểu diễn tốt; adapter tuning hiệu quả tham số
 - **Hạn chế:** Cần GPU; thời gian training dài hơn ML cổ điển
 
@@ -156,15 +156,15 @@ Raw Logs → Log Parsing → Log Grouping → Feature Extraction → Anomaly Det
   - Phase 2: RAG + LLM (GPT-3.5-turbo hoặc Mistral-7B) tái đánh giá các mẫu được phát hiện bằng log template embeddings
 - **Ý tưởng:** Giảm FP bằng cách dùng LLM + RAG để xác minh lại kết quả; dùng cả log token lẫn log template để giảm ảnh hưởng parsing errors
 - **Tiền xử lý:** Drain parsing → BigLog pretrained encoder → window-based grouping (window_size=200, window_time=1800s)
-- **Dữ liệu hỗ trợ (mã nguồn):** BGL, Spirit (cần mở rộng cho HDFS_v3)
+- **Dữ liệu hỗ trợ (mã nguồn):** BGL, Spirit (cần mở rộng cho HDFS_v1)
 - **Ưu điểm:** Giảm FP nhờ LLM reasoning; khả năng giải thích tốt nhất (LLM reasoning output bằng ngôn ngữ tự nhiên)
 - **Hạn chế:** Cần API key OpenAI hoặc Mistral-7B local; chi phí tính toán và tài chính cao (latency + API cost); phụ thuộc vào chất lượng LLM
 
-### 2.6. Bộ dữ liệu benchmark: HDFS_v3, BGL
+### 2.6. Bộ dữ liệu benchmark: HDFS_v1, BGL
 
 #### 2.6.1. Mô tả chi tiết
 
-| Đặc tính | HDFS_v3 (TraceBench) | BGL |
+| Đặc tính | HDFS_v1 (TraceBench) | BGL |
 |---|---|---|
 | **Loại hệ thống** | Hệ phân tán (Hadoop HDFS) | Siêu máy tính (BlueGene/L) |
 | **Quy mô** | ~14.8M dòng, 2.96 GiB | ~4.75M dòng, 708.76 MiB |
@@ -175,18 +175,18 @@ Raw Logs → Log Parsing → Log Grouping → Feature Extraction → Anomaly Det
 
 #### 2.6.2. Ma trận hỗ trợ (mã nguồn hiện tại)
 
-| Phương pháp | HDFS_v3 | BGL | Cần mở rộng |
+| Phương pháp | HDFS_v1 | BGL | Cần mở rộng |
 |---|---|---|---|
 | LightAD | ✓ | ✓ | — (hỗ trợ đầy đủ) |
 | LogFormer | ✓ | ✓ | — (hỗ trợ đầy đủ) |
-| LogRAG | ✗ | ✓ | HDFS_v3 |
+| LogRAG | ✗ | ✓ | HDFS_v1 |
 
 #### 2.6.3. Lý do chọn hai bộ dữ liệu
 
-- **Bao phủ hai loại môi trường hệ thống quan trọng:** hệ phân tán (HDFS_v3) và siêu máy tính (BGL)
-- **Khác nhau về cơ chế nhãn:** fault injection có kiểm soát (HDFS_v3) vs. lỗi tự nhiên production (BGL) — cho phép đánh giá tính ổn định của phương pháp
-- **Khác nhau về cấp độ nhãn:** trace-level (HDFS_v3) vs. line-level (BGL) — kiểm tra khả năng thích ứng với granularity khác nhau
-- **Khác nhau về quy mô và đặc điểm:** HDFS_v3 lớn hơn (~3× về số dòng); BGL có tỷ lệ bất thường tự nhiên thấp (~7.3%)
+- **Bao phủ hai loại môi trường hệ thống quan trọng:** hệ phân tán (HDFS_v1) và siêu máy tính (BGL)
+- **Khác nhau về cơ chế nhãn:** fault injection có kiểm soát (HDFS_v1) vs. lỗi tự nhiên production (BGL) — cho phép đánh giá tính ổn định của phương pháp
+- **Khác nhau về cấp độ nhãn:** trace-level (HDFS_v1) vs. line-level (BGL) — kiểm tra khả năng thích ứng với granularity khác nhau
+- **Khác nhau về quy mô và đặc điểm:** HDFS_v1 lớn hơn (~3× về số dòng); BGL có tỷ lệ bất thường tự nhiên thấp (~7.3%)
 - **Được sử dụng rộng rãi:** cả hai đều có nhãn công khai, là chuẩn benchmark trong cộng đồng nghiên cứu LogAD
 
 ### 2.7. Chỉ số đánh giá và sự không đồng nhất trong tài liệu
@@ -198,9 +198,9 @@ Raw Logs → Log Parsing → Log Grouping → Feature Extraction → Anomaly Det
 
 ### 2.8. Khoảng trống nghiên cứu (tổng hợp)
 
-1. **Chưa có benchmark thống nhất cho ba họ kỹ thuật chủ đạo:** Chưa có đánh giá nào đặt đồng thời ML cổ điển siêu nhẹ (LightAD), Transformer (LogFormer), và LLM+RAG (LogRAG) lên cùng một giao thức thực nghiệm thống nhất trên HDFS_v3 và BGL.
+1. **Chưa có benchmark thống nhất cho ba họ kỹ thuật chủ đạo:** Chưa có đánh giá nào đặt đồng thời ML cổ điển siêu nhẹ (LightAD), Transformer (LogFormer), và LLM+RAG (LogRAG) lên cùng một giao thức thực nghiệm thống nhất trên HDFS_v1 và BGL.
 2. **Chưa có phân tích chi phí tính toán so sánh trực tiếp:** Đánh đổi giữa chi phí LLM/RAG (cả API cost lẫn latency) so với phương pháp Transformer và ML cổ điển siêu nhẹ chưa được làm rõ trên cùng phần cứng.
-3. **Chưa có phân tích ổn định giữa fault injection và lỗi tự nhiên:** Chưa rõ phương pháp nào ổn định nhất khi chuyển từ HDFS_v3 (fault injection có kiểm soát) sang BGL (lỗi tự nhiên production).
+3. **Chưa có phân tích ổn định giữa fault injection và lỗi tự nhiên:** Chưa rõ phương pháp nào ổn định nhất khi chuyển từ HDFS_v1 (fault injection có kiểm soát) sang BGL (lỗi tự nhiên production).
 4. **Chưa có phân tích lỗi có cấu trúc so sánh ba họ kỹ thuật:** Chưa có taxonomy FP/FN đặc trưng để hiểu kiểu lỗi nào phổ biến với ML cổ điển, Transformer, hay LLM+RAG.
 5. **Khả năng giải thích chưa được so sánh trực tiếp:** Chưa có đánh giá so sánh giữa tính minh bạch của ML cổ điển (feature importance, decision path), attention mechanism của Transformer, và LLM reasoning output.
 
@@ -215,7 +215,7 @@ Raw Logs → Log Parsing → Log Grouping → Feature Extraction → Anomaly Det
 | RQ | Kết quả cần có | Phương pháp trả lời |
 |---|---|---|
 | RQ1 | Bảng benchmark chéo (3 × 2 × P/R/F1/PR-AUC) | So sánh trực tiếp trên cùng pipeline |
-| RQ2 | Rank correlation (Spearman/Kendall); phân tích đặc trưng fault injection vs. lỗi tự nhiên | Phân tích thay đổi thứ hạng; so sánh HDFS_v3 vs. BGL |
+| RQ2 | Rank correlation (Spearman/Kendall); phân tích đặc trưng fault injection vs. lỗi tự nhiên | Phân tích thay đổi thứ hạng; so sánh HDFS_v1 vs. BGL |
 | RQ3 | Biểu đồ F1 vs. latency; bảng RAM/GPU memory; phân tích API cost (LogRAG) | Đo thời gian + bộ nhớ + chi phí API trên cùng phần cứng |
 | RQ4 | Taxonomy lỗi FP/FN cho từng phương pháp; case study; so sánh khả năng giải thích | Lấy mẫu 50-100 FP/FN; phân loại thủ công; đánh giá LightAD (minh bạch), LogFormer (attention), LogRAG (LLM reasoning) |
 
@@ -226,7 +226,7 @@ Ba phương pháp được chọn vì thỏa mãn đồng thời:
 1. **Tính đại diện:** bao phủ ba họ kỹ thuật chủ đạo (ML cổ điển siêu nhẹ, Transformer, LLM+RAG)
 2. **Tính thời sự:** công bố 2024 (SOTA gần nhất)
 3. **Khả năng tái lập:** có mã nguồn mở đầy đủ trong dự án
-4. **Tính so sánh:** có giao thoa bộ dữ liệu để đánh giá chung (HDFS_v3 và/hoặc BGL)
+4. **Tính so sánh:** có giao thoa bộ dữ liệu để đánh giá chung (HDFS_v1 và/hoặc BGL)
 5. **Tính đặc trưng:** mỗi phương pháp có điểm mạnh và đánh đổi riêng biệt về chi phí-hiệu quả
 
 Mỗi baseline được ghi nhận:
@@ -239,7 +239,7 @@ Mỗi baseline được ghi nhận:
 
 - **Nguồn:** LogHub (logpai/loghub) — ghi nhận phiên bản/commit khi tải
 - **Ghi nhận:** số bản ghi, tỷ lệ bất thường, cấp độ nhãn
-- **Lý do chọn HDFS_v3 và BGL:** (xem Mục 2.6.3)
+- **Lý do chọn HDFS_v1 và BGL:** (xem Mục 2.6.3)
   - Bao phủ hai loại hệ thống quan trọng (phân tán, siêu máy tính)
   - Khác nhau về cơ chế nhãn (fault injection vs. lỗi tự nhiên)
   - Khác nhau về cấp độ nhãn (trace-level vs. line-level)
@@ -270,27 +270,27 @@ Mỗi baseline được ghi nhận:
 - Chuẩn hóa timestamp; loại bỏ bản ghi thiếu trường bắt buộc
 - Xử lý dữ liệu trùng lặp, thiếu và mẫu không hợp lệ
 - **Grouping strategy phù hợp với từng dataset:**
-  - HDFS_v3: theo Block ID (trace-level)
+  - HDFS_v1: theo Block ID (trace-level)
   - BGL: theo time window hoặc session ID (line-level)
 
 ### 3.5. Đồng bộ hóa pipeline đầu vào (mở rộng mã nguồn)
 
 | Phương pháp | Mở rộng cần thực hiện | Mức độ phức tạp | Chi tiết kỹ thuật |
 |---|---|---|---|
-| LightAD | Không cần | — | Đã hỗ trợ đầy đủ HDFS_v3 và BGL |
-| LogFormer | Không cần | — | Đã hỗ trợ đầy đủ HDFS_v3 và BGL |
-| LogRAG | Thêm HDFS_v3 | Trung bình-Cao | Tạo `log_structured.csv` cho HDFS_v3; điều chỉnh window strategy theo trace ID |
+| LightAD | Không cần | — | Đã hỗ trợ đầy đủ HDFS_v1 và BGL |
+| LogFormer | Không cần | — | Đã hỗ trợ đầy đủ HDFS_v1 và BGL |
+| LogRAG | Thêm HDFS_v1 | Trung bình-Cao | Tạo `log_structured.csv` cho HDFS_v1; điều chỉnh window strategy theo trace ID |
 
 **Ưu điểm của việc giảm xuống 3 phương pháp và 2 dataset:**
-- LightAD và LogFormer đã hỗ trợ sẵn cả HDFS_v3 và BGL
-- Chỉ cần mở rộng LogRAG cho HDFS_v3
+- LightAD và LogFormer đã hỗ trợ sẵn cả HDFS_v1 và BGL
+- Chỉ cần mở rộng LogRAG cho HDFS_v1
 - Giảm đáng kể công việc chuẩn bị pipeline (so với 6 phương pháp × 3 datasets)
 
 ### 3.6. Giao thức chia dữ liệu và kiểm soát data leakage
 
 | Dataset | Chiến lược chia | Chi tiết |
 |---|---|---|
-| **HDFS_v3** | Theo trace ID | `normal_trace.csv` + `failure_trace.csv`; 80/10/10; đảm bảo phân phối loại fault đa dạng trong test |
+| **HDFS_v1** | Theo trace ID | `normal_trace.csv` + `failure_trace.csv`; 80/10/10; đảm bảo phân phối loại fault đa dạng trong test |
 | **BGL** | Chronological split | Fixed-size window theo thời gian; không random shuffle để tránh data leakage |
 
 **Kiểm soát:**
@@ -328,7 +328,7 @@ Mỗi baseline được ghi nhận:
 | Độ trễ suy luận | ms/sample trung bình | RQ3 |
 | Bộ nhớ đỉnh | MB/GB (GPU + RAM) | RQ3 |
 | Chi phí API (LogRAG) | USD (ước tính) | RQ3 |
-| Rank correlation | Spearman/Kendall τ giữa HDFS_v3 và BGL | RQ2 |
+| Rank correlation | Spearman/Kendall τ giữa HDFS_v1 và BGL | RQ2 |
 | Taxonomy lỗi FP/FN | Phân nhóm có tiêu chí rõ | RQ4 |
 
 ### 3.9. Thiết kế đánh giá phát hiện sớm (RQ4)
@@ -337,7 +337,7 @@ Mỗi baseline được ghi nhận:
 - Chỉ áp dụng với dataset/phương pháp cho phép xác định dự đoán tại từng tiền tố
 - Không dùng thông tin xuất hiện sau thời điểm giả định phát hiện
 - Vẽ đường cong hiệu quả theo tiền tố; phân tích đánh đổi early detection vs. FPR
-- Tách riêng phân tích cho: fault injection (HDFS_v3) vs. lỗi tự nhiên (BGL) vs. cloud failure (OpenStack)
+- Tách riêng phân tích cho: fault injection (HDFS_v1) vs. lỗi tự nhiên (BGL) vs. cloud failure (OpenStack)
 
 ### 3.9. Quy trình phân tích lỗi (RQ4)
 
@@ -396,11 +396,11 @@ Mỗi baseline được ghi nhận:
 - Phân tích: phương pháp nào đạt F1 cao nhất tổng thể? Có khác biệt đáng kể?
 - So sánh giữa ba họ kỹ thuật: ML cổ điển vs. Transformer vs. LLM+RAG
 
-### 4.2. RQ2: Độ ổn định giữa HDFS_v3 và BGL
+### 4.2. RQ2: Độ ổn định giữa HDFS_v1 và BGL
 
 - Rank correlation (Spearman ρ, Kendall τ) giữa thứ hạng trên 2 datasets
 - Trường hợp điển hình: phương pháp nào "overfit" vào đặc trưng một loại log?
-- **So sánh quan trọng:** hiệu quả trên fault injection có kiểm soát (HDFS_v3) vs. lỗi tự nhiên production (BGL)
+- **So sánh quan trọng:** hiệu quả trên fault injection có kiểm soát (HDFS_v1) vs. lỗi tự nhiên production (BGL)
 - Phân tích: phương pháp nào ổn định nhất? Phương pháp nào phụ thuộc vào đặc tính dữ liệu?
 - Heatmap thay đổi thứ hạng
 
@@ -418,7 +418,7 @@ Mỗi baseline được ghi nhận:
 
 - **Taxonomy lỗi FP/FN:**
   - Bảng tổng hợp tỷ lệ từng nhóm lỗi theo phương pháp và dataset
-  - So sánh đặc điểm lỗi: HDFS_v3 (fault injection) vs. BGL (lỗi tự nhiên)
+  - So sánh đặc điểm lỗi: HDFS_v1 (fault injection) vs. BGL (lỗi tự nhiên)
   - Case study minh họa (ví dụ cụ thể cho từng nhóm lỗi)
 - **Đánh giá định tính khả năng giải thích:**
   - **LightAD:** ví dụ feature importance (SLFN/DT), nearest neighbor analysis (KNN)
@@ -517,7 +517,7 @@ Mỗi baseline được ghi nhận:
 
 ### Bộ dữ liệu:
 12. Zhu, J., et al. (2023). *Loghub: A Large Collection of System Log Datasets for AI-driven Log Analytics.* ISSRE 2023.
-13. Zhou, X., et al. (2014). *TraceBench: An Open Data Set for Trace-oriented Monitoring.* CloudCom 2014. (HDFS_v3)
+13. Zhou, X., et al. (2014). *TraceBench: An Open Data Set for Trace-oriented Monitoring.* CloudCom 2014. (HDFS_v1)
 14. Oliner, A. & Stearley, J. (2007). *What Supercomputers Say: A Study of Five System Logs.* DSN 2007. (BGL)
 
 ### Phương pháp luận:

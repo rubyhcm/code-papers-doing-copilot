@@ -36,7 +36,7 @@ gantt
 
 **Kế hoạch chi tiết thực hiện đề cương:**
 - 3 phương pháp đại diện (LightAD, LogFormer, LogRAG)
-- 2 datasets chuẩn (HDFS_v3, BGL)
+- 2 datasets chuẩn (HDFS_v1, BGL)
 - 4 Research Questions (RQ1-RQ4)
 - 6 tháng thực hiện (01/2027 - 06/2027)
 
@@ -59,10 +59,10 @@ _Tương ứng với T1 trong đề cương: ND1 — Dữ liệu log và phân t
 
 | # | Task | Output |
 |---|---|---|
-| 1.5 | Tải datasets từ LogHub: HDFS_v3 (14.8M dòng), BGL (4.7M dòng) | Raw data files |
+| 1.5 | Tải datasets từ LogHub: HDFS_v1 (14.8M dòng), BGL (4.7M dòng) | Raw data files |
 | 1.6 | Xây dựng pipeline log parsing bằng Drain | Drain parser hoàn chỉnh |
 | 1.7 | Phân tích thống kê mô tả: số lượng sự kiện, tỷ lệ bất thường, phân phối template | Bảng phân tích đặc điểm 2 datasets |
-| 1.8 | So sánh đặc điểm HDFS_v3 (fault injection, block-based) vs. BGL (natural errors, time-based) | Comparative analysis |
+| 1.8 | So sánh đặc điểm HDFS_v1 (fault injection, block-based) vs. BGL (natural errors, time-based) | Comparative analysis |
 
 ### Tuần 4: Xác định RQ và viết Chương 1-2 (nháp)
 
@@ -122,8 +122,8 @@ _Tương ứng với T3 trong đề cương: ND3 (a) — Tái lập và mở r�
 
 | # | Task | Output | Rủi ro |
 |---|---|---|---|
-| 3.1 | **LightAD:** Fix hardcoded paths; chạy `preprocess.py --dataset hdfs` → `main_hdfs.py --model knn/dt/slfn`; tương tự cho BGL | Kết quả trên HDFS_v3, BGL | Thấp — code đơn giản |
-| 3.2 | **LogFormer:** Drain parsing → `train_transformer.py` → `tune_transformer.py` cho HDFS_v3, BGL | Pre-train + adapter tune results | Trung bình — cần GPU |
+| 3.1 | **LightAD:** Fix hardcoded paths; chạy `preprocess.py --dataset hdfs` → `main_hdfs.py --model knn/dt/slfn`; tương tự cho BGL | Kết quả trên HDFS_v1, BGL | Thấp — code đơn giản |
+| 3.2 | **LogFormer:** Drain parsing → `train_transformer.py` → `tune_transformer.py` cho HDFS_v1, BGL | Pre-train + adapter tune results | Trung bình — cần GPU |
 | 3.3 | Xây dựng data splitting scripts thống nhất (80/10/10) | `split_data.py` |
 
 ### Tuần 2: Tái lập baseline 3
@@ -137,11 +137,11 @@ _Tương ứng với T3 trong đề cương: ND3 (a) — Tái lập và mở r�
 > [!WARNING]
 > **Dự phòng:** Nếu LogRAG không thể tái lập sau 1.5 tuần, giảm xuống 2 phương pháp và báo cáo lý do.
 
-### Tuần 3: Mở rộng LogRAG cho HDFS_v3
+### Tuần 3: Mở rộng LogRAG cho HDFS_v1
 
 | # | Task | Chi tiết kỹ thuật | Output |
 |---|---|---|---|
-| 3.7 | **LogRAG → HDFS_v3** | Tạo `log_structured.csv` format; điều chỉnh window strategy theo trace ID | LogRAG chạy trên HDFS_v3 |
+| 3.7 | **LogRAG → HDFS_v1** | Tạo `log_structured.csv` format; điều chỉnh window strategy theo trace ID | LogRAG chạy trên HDFS_v1 |
 | 3.8 | Validation kết quả | Kiểm tra output hợp lý; debug nếu cần | Validation report |
 
 ### Tuần 4: Validation chạy sơ bộ
@@ -277,7 +277,7 @@ _Tương ứng với T6 trong đề cương: Hoàn thiện toàn văn luận vă
 | LogRAG API key không khả dụng / chi phí cao | Cao | Cao | Dùng Mistral-7B local thay GPT; hoặc giảm xuống 2 phương pháp (LightAD + LogFormer) |
 | GPU không đủ cho LogFormer training | Thấp | Trung bình | Dùng Google Colab Pro hoặc cloud GPU; giảm batch_size |
 | Kết quả tái lập khác xa bài báo gốc | Trung bình | Trung bình | Ghi nhận sai khác; liên hệ tác giả gốc; kiểm tra hyperparameters |
-| Dataset HDFS_v3 quá lớn (14.8M dòng) | Thấp | Thấp | Sampling có kiểm soát nếu cần; báo cáo rõ |
+| Dataset HDFS_v1 quá lớn (14.8M dòng) | Thấp | Thấp | Sampling có kiểm soát nếu cần; báo cáo rõ |
 | Thời gian viết không đủ | Thấp | Trung bình | Viết song song với thực nghiệm (nháp Chương 1-3 sớm) |
 | Taxonomy phát hiện bất thường thiếu depth | Trung bình | Thấp | Tham khảo survey papers (Chalapathy & Chawla, ACM Computing Surveys 2019) |
 
