@@ -1,0 +1,17 @@
+\chapter{Kết quả thực nghiệm sơ bộ}
+
+\section{Kết quả HDFS\_v1}
+Ba mô hình LightAD đều đạt F1 gần 1.0 trên split block HDFS\_v1 ở năm seed.
+Biến thiên giữa seed nhỏ, nhưng kết quả cần kiểm tra chất lượng split, duplicate
+block và khả năng dữ liệu leak trước khi công bố final.
+
+\section{Kết quả BGL}
+BGL được đánh giá trên fixed window 200 dòng theo chronological split.
+Decision Tree đạt precision và FPR tốt nhưng recall thấp. KNN đạt recall cao
+nhưng FPR cao. SLFN có F1 trung gian nhưng biến thiên lớn giữa seed.
+
+\section{Chi phí tính toán}
+Decision Tree train nhanh; KNN inference chậm trên HDFS\_v1; SLFN train lâu
+nhất trong ba mô hình. Các giá trị chi tiết được trình bày trong bảng.
+
+\input{thesis/tables/rq1_rq3_lightad.tex}

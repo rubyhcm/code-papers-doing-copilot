@@ -1,0 +1,19 @@
+\input{thesis/tables/rq1_lightad.tex}
+
+\begin{table}[ht]
+\centering
+\caption{Chi phí tính toán LightAD sơ bộ}
+\label{tab:rq2_lightad}
+\begin{tabular}{llrrr}
+\toprule
+Dataset & Mô hình & Train (s) & Inference (s) & Latency/test (ms) \\
+\midrule
+HDFS\_v1 & DT & 0.307698 & 0.006858 & 0.000119 \\
+HDFS\_v1 & KNN & 0.048526 & 6.288217 & 0.109347 \\
+HDFS\_v1 & SLFN & 4.417464 & 0.007635 & 0.000133 \\
+BGL & DT & 0.469191 & 0.001158 & 0.000488 \\
+BGL & KNN & 0.003962 & 0.122019 & 0.051398 \\
+BGL & SLFN & 2.052090 & 0.000874 & 0.000368 \\
+\bottomrule
+\end{tabular}
+\end{table}

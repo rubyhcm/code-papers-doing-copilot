@@ -32,6 +32,6 @@ HDFS\_v1 chứa 11.175.629 dòng log thô. Nhãn được gắn ở cấp block 
 Tổng số block là 575.061.
 
 \subsection{BGL}
-BGL chứa 4.747.963 dòng log thô trong dữ liệu tải về. File raw hiện không
-cung cấp ground-truth label theo từng dòng. Do đó nghiên cứu cần thêm nguồn
-nhãn chuẩn trước khi tính chỉ số đánh giá BGL.
+BGL chứa 4.747.963 dòng log thô trong dữ liệu tải về. Cột đầu của mỗi dòng
+cung cấp ground-truth ở cấp line: dấu `-` là Normal; các category khác là
+Anomaly. Dataset có 348.460 dòng alert và 4.399.503 dòng non-alert.

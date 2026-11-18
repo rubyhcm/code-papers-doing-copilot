@@ -29,10 +29,8 @@ Thư mục HDFS_v1 không còn chứa TraceBench hoặc trace CSV.
   10.887.379 dòng `Normal` và 288.250 dòng `Anomaly`.
 - Tất cả 575.061 block trong file nhãn đều xuất hiện trong `HDFS.log`.
 - Trong 575.061 block: 558.223 block `Normal` và 16.838 block `Anomaly`.
-- BGL raw có 4.747.963 dòng và tất cả đều có `label: null` trong JSONL hiện tại.
-  Đây là trạng thái đúng với file raw đã tải, vì `BGL.log` không cung cấp
-  ground-truth label. Không được suy ra nhãn Anomaly từ các mức độ như
-  `FATAL` hoặc `WARN` mà không có quy tắc nhãn đã xác thực.
+- BGL raw có 4.747.963 dòng. Cột đầu `-` là Normal và category khác `-`
+  là Anomaly. JSONL hiện có 4.399.503 Normal và 348.460 Anomaly.
 
 ## HDFS_v1
 

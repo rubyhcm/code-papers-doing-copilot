@@ -17,3 +17,19 @@
 - [x] TASK 2.5: Chương 2 phần phát hiện bất thường đã được tạo.
 - [x] TASK 2.6-2.10: `.venv312/` Python 3.12.16 đã cài PyTorch, Transformers, scikit-learn, pandas, numpy, matplotlib, seaborn và Drain3. PyTorch MPS khả dụng; CUDA không khả dụng trên macOS.
 - [x] TASK 2.11-2.14: Chương 3 bản nháp và PDF draft v3 đã compile.
+- [x] TASK 3.3: Split HDFS_v1 80/10/10 và window manifest BGL đã tạo.
+- [x] TASK 3.6: Script metric thống nhất và unit tests đã tạo.
+- [x] TASK 3.1: LightAD DT/KNN/SLFN đã chạy trên HDFS_v1.
+- [x] TASK 3.7: Adapter HDFS_v1 cho LogRAG đã tạo.
+- [ ] TASK 3.2: LogFormer blocked: thiếu preprocessed NPZ/checkpoint.
+- [ ] TASK 3.4-3.5: LogRAG blocked: thiếu pretrained/LLM; ground-truth BGL đã xác định.
+- [x] Ground-truth BGL đã xác định từ cột đầu `BGL.log`: `-`=Normal, category khác=Anomaly.
+- [x] BGL đã parse lại: 4.399.503 Normal, 348.460 Anomaly; 844 template.
+- [x] BGL window split: 18.991 train, 2.374 validation, 2.374 test windows.
+- [ ] TASK 3.8-3.12: Chỉ có LightAD result và validation local; chưa hoàn tất reproduction paper.
+- [x] TASK 4.1-4.4: LightAD HDFS/BGL đã benchmark sơ bộ trên 5 seed.
+- [x] TASK 4.5-4.9: RQ2 LightAD cost đã đo training/inference/latency/peak RSS.
+- [x] TASK 4.10-4.14: RQ3 Pareto LightAD đã sinh.
+- [x] Month 4 gate partial: RQ1-RQ3 LightAD đã hoàn thành; LogFormer/LogRAG vẫn blocked.
+- [x] Đã tạo Kaggle notebook full benchmark LightAD:
+  `notebooks/logad_kaggle_full_benchmark.ipynb`.

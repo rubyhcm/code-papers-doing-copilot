@@ -1,0 +1,50 @@
+{
+  "hdfs_v1": {
+    "dataset": "hdfs_v1",
+    "models": {
+      "dt": {
+        "train_time_seconds": 0.30769775004591793,
+        "inference_time_seconds": 0.0068575829500332475,
+        "latency_per_test_sample_ms": 0.00011924779505161541,
+        "test_samples": 57507
+      },
+      "knn": {
+        "train_time_seconds": 0.04852570907678455,
+        "inference_time_seconds": 6.288217207998969,
+        "latency_per_test_sample_ms": 0.10934698746237795,
+        "test_samples": 57507
+      },
+      "slfn": {
+        "train_time_seconds": 4.417464250000194,
+        "inference_time_seconds": 0.007634792011231184,
+        "latency_per_test_sample_ms": 0.00013276282906830793,
+        "test_samples": 57507
+      }
+    },
+    "peak_rss_mb": 713.484375
+  },
+  "bgl": {
+    "dataset": "bgl",
+    "models": {
+      "dt": {
+        "train_time_seconds": 0.4691907089436427,
+        "inference_time_seconds": 0.0011576249962672591,
+        "latency_per_test_sample_ms": 0.0004876263674251302,
+        "test_samples": 2374
+      },
+      "knn": {
+        "train_time_seconds": 0.003962166956625879,
+        "inference_time_seconds": 0.12201929197181016,
+        "latency_per_test_sample_ms": 0.05139818532932189,
+        "test_samples": 2374
+      },
+      "slfn": {
+        "train_time_seconds": 2.0520895830122754,
+        "inference_time_seconds": 0.0008738340111449361,
+        "latency_per_test_sample_ms": 0.00036808509315287954,
+        "test_samples": 2374
+      }
+    },
+    "peak_rss_mb": 787.484375
+  }
+}

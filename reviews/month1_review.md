@@ -22,8 +22,8 @@ Các thư mục/chương Tháng 1 thiếu ở đầu phiên làm việc đã đ�
 - HDFS_v1: 11.175.629 dòng, 45 template, 288.250 dòng Anomaly.
 - HDFS_v1: 575.061 block, 558.223 Normal và 16.838 Anomaly.
 - BGL: 4.747.963 dòng, 844 template.
-- BGL raw không có ground-truth label; `anomaly_lines=0` không phải kết quả
-  phát hiện, mà là do dữ liệu parse chưa gắn nhãn.
+- BGL raw có ground-truth line-level ở cột đầu: `-` là Normal, category khác
+  là Anomaly. Kết quả hiện tại: 348.460 anomaly, 4.399.503 normal.
 
 ## Sai lệch cần theo dõi
 

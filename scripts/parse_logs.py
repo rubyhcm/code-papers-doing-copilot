@@ -45,7 +45,11 @@ def _iter_csv(path: Path) -> Iterator[Dict[str, object]]:
         for line_number, row in enumerate(csv.DictReader(stream), start=1):
             template = row.get("EventTemplate") or row.get("Content") or ""
             template_id = row.get("EventId") or row.get("EventID")
-            label = row.get("Label")
+            raw_label = row.get("Label")
+            if raw_label is not None:
+                label = "Anomaly" if is_anomaly(raw_label) else "Normal"
+            else:
+                label = None
             yield {
                 "line_id": row.get("LineId") or line_number,
                 "raw": row.get("Content") or "",
@@ -67,7 +71,10 @@ def _iter_raw(path: Path, dataset: str,
                 continue
             result = miner.add_log_message(raw)
             label = None
-            if labels:
+            if dataset == "bgl":
+                alert_category = raw.split(maxsplit=1)[0] if raw else ""
+                label = "Normal" if alert_category == "-" else "Anomaly"
+            elif labels:
                 block_ids = re.findall(r"\bblk_[A-Za-z0-9_-]+", raw)
                 matched = [labels[block_id] for block_id in block_ids
                            if block_id in labels]
@@ -84,9 +91,14 @@ def _iter_raw(path: Path, dataset: str,
 
 
 def is_anomaly(value: object) -> bool:
-    return str(value or "").strip().lower() in {
+    normalized = str(value or "").strip().lower()
+    if normalized in {"", "-", "normal", "success", "non-alert", "nonalert"}:
+        return False
+    if normalized in {
         "1", "true", "anomaly", "anomalous", "yes", "error"
-    }
+    }:
+        return True
+    return normalized not in {"normal", "success"}
 
 
 def load_labels(path: Optional[Path]) -> Dict[str, str]:

@@ -1891,24 +1891,24 @@ EOF
 
 ### ✅ THÁNG 3 DELIVERABLES CHECKLIST
 
-- [ ] `results/lightad_baseline.json` (6 configurations)
+- [ ] `results/lightad_baseline.json` (partial: HDFS_v1 DT/KNN/SLFN; BGL blocked)
 - [ ] `results/logformer_baseline.json` (2 configurations)
 - [ ] `results/lograg_baseline_full.json` (2 configurations)
-- [ ] `data/splits/hdfs_{train,val,test}.csv`
-- [ ] `data/splits/bgl_{train,val,test}.csv`
-- [ ] `scripts/split_data.py`
-- [ ] `scripts/evaluate.py`
+- [x] `data/splits/hdfs_{train,val,test}.npz`
+- [x] `data/splits/bgl_{train,val,test}.csv`
+- [x] `scripts/split_data.py`
+- [x] `scripts/evaluate.py`
 - [ ] `scripts/sanity_check.py`
-- [ ] `scripts/validate_reproduction.py`
+- [x] `scripts/validate_reproduction.py`
 - [ ] `repos/LightAD/adapt_data.py`
 - [ ] `repos/LogFormer/adapt_data_logformer.py`
-- [ ] `repos/LogRAG/adapt_hdfs.py`
+- [x] `LogRAG/adapt_hdfs.py`
 - [ ] `repos/LogRAG/config_hdfs.yaml`
-- [ ] `experiments/01_lightad_reproduction_report.md`
-- [ ] `experiments/02_logformer_reproduction_report.md`
-- [ ] `experiments/03_lograg_reproduction_report.md`
-- [ ] `experiments/04_lograg_hdfs_extension.md`
-- [ ] `experiments/05_validation_report.md`
+- [x] `experiments/01_lightad_reproduction_report.md`
+- [x] `experiments/02_logformer_reproduction_report.md`
+- [x] `experiments/03_lograg_reproduction_report.md`
+- [x] `experiments/04_lograg_hdfs_extension.md`
+- [x] `experiments/05_validation_report.md`
 - [ ] `experiments/06_codebase_documentation.md`
 
 **Total Estimated Time:** 60-75 hours
