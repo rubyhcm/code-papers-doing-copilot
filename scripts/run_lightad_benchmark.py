@@ -15,11 +15,16 @@ import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import train_test_split
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.evaluate import compute_metrics
+from scripts.shared_benchmark_protocol import (
+    PROTOCOL_VERSION,
+    align_indices,
+    load_split_table,
+    select_f1_threshold,
+)
 
 
 SEEDS = (42, 123, 456, 789, 2024)
@@ -50,7 +55,7 @@ def load_hdfs(matrix_path: Path):
     y_data = frame["Label"].replace(
         {"Normal": 0, "Success": 0, "Anomaly": 1, "Fail": 1}
     ).to_numpy(dtype=np.int64)
-    return x_data, y_data
+    return x_data, y_data, frame["BlockId"].astype(str).to_numpy()
 
 
 def load_bgl(parsed_path: Path, window_size: int = 200):
@@ -77,6 +82,7 @@ def load_bgl(parsed_path: Path, window_size: int = 200):
              in enumerate(ordered_ids)}
     x_rows = []
     y_rows = []
+    sample_ids = []
 
     with parsed_path.open(encoding="utf-8", errors="replace") as stream:
         window_counts = Counter()
@@ -97,39 +103,15 @@ def load_bgl(parsed_path: Path, window_size: int = 200):
                     for i in range(len(ordered_ids))
                 ])
                 y_rows.append(window_label)
+                sample_ids.append(
+                    f"bgl:{position - window_size}:{position}"
+                )
                 window_counts = Counter()
                 window_label = 0
 
     x_data = np.asarray(x_rows, dtype=np.float32)
     y_data = np.asarray(y_rows, dtype=np.int64)
-    return x_data, y_data
-
-
-def chronological_split(y_data: np.ndarray):
-    train_end = int(0.8 * len(y_data))
-    val_end = int(0.9 * len(y_data))
-    return (
-        np.arange(train_end),
-        np.arange(train_end, val_end),
-        np.arange(val_end, len(y_data)),
-    )
-
-
-def stratified_split(y_data: np.ndarray, seed: int):
-    indices = np.arange(len(y_data))
-    train_idx, temp_idx = train_test_split(
-        indices,
-        test_size=0.20,
-        random_state=seed,
-        stratify=y_data,
-    )
-    val_idx, test_idx = train_test_split(
-        temp_idx,
-        test_size=0.50,
-        random_state=seed,
-        stratify=y_data[temp_idx],
-    )
-    return train_idx, val_idx, test_idx
+    return x_data, y_data, np.asarray(sample_ids, dtype=str)
 
 
 def run_model(
@@ -141,24 +123,38 @@ def run_model(
     test_idx: np.ndarray,
     seed: int,
 ) -> dict:
-    del val_idx
     model = make_model(model_name, seed)
     start = time.perf_counter()
     model.fit(x_data[train_idx], y_data[train_idx])
     train_time = time.perf_counter() - start
 
+    if not hasattr(model, "predict_proba"):
+        raise TypeError(f"{model_name} must provide predict_proba scores")
+    val_scores = model.predict_proba(x_data[val_idx])[:, 1]
+    threshold = select_f1_threshold(y_data[val_idx], val_scores)
+    val_predictions = (val_scores >= threshold).astype(np.int64)
+    val_metrics = compute_metrics(
+        y_data[val_idx],
+        val_predictions,
+        val_scores,
+    )
+
     start = time.perf_counter()
-    y_pred = model.predict(x_data[test_idx])
+    y_scores = model.predict_proba(x_data[test_idx])[:, 1]
+    y_pred = (y_scores >= threshold).astype(np.int64)
     infer_time = time.perf_counter() - start
-    y_scores = None
-    if hasattr(model, "predict_proba"):
-        y_scores = model.predict_proba(x_data[test_idx])[:, 1]
 
     metrics = compute_metrics(y_data[test_idx], y_pred, y_scores)
     metrics.update({
         "train_time_seconds": train_time,
         "inference_time_seconds": infer_time,
         "seed": seed,
+        "threshold": threshold,
+        "validation": {
+            key: val_metrics[key]
+            for key in ("precision", "recall", "f1")
+        },
+        "model_config": model.get_params(deep=False),
     })
     return metrics
 
@@ -202,17 +198,39 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("results/rq1_lightad_results.json"),
+        default=Path("results/rq1_lightad_shared_protocol_v1.json"),
     )
     parser.add_argument(
         "--window-size",
         type=int,
         default=200,
     )
+    parser.add_argument(
+        "--protocol-dir",
+        type=Path,
+        default=Path("data/splits/benchmark_protocol_v1"),
+    )
     args = parser.parse_args()
 
-    hdfs_x, hdfs_y = load_hdfs(args.hdfs_matrix)
-    bgl_x, bgl_y = load_bgl(args.bgl_jsonl, args.window_size)
+    if not (args.protocol_dir / "manifest.json").exists():
+        parser.error(
+            f"Shared benchmark protocol not found in {args.protocol_dir}; "
+            "run scripts/shared_benchmark_protocol.py first."
+        )
+    protocol = json.loads(
+        (args.protocol_dir / "manifest.json").read_text(encoding="utf-8")
+    )
+    if protocol.get("protocol_version") != PROTOCOL_VERSION:
+        parser.error(
+            f"Expected protocol {PROTOCOL_VERSION}, found "
+            f"{protocol.get('protocol_version')!r}."
+        )
+    hdfs_table = load_split_table(args.protocol_dir, "hdfs_v1")
+    bgl_table = load_split_table(args.protocol_dir, "bgl")
+    hdfs_x, hdfs_y, hdfs_ids = load_hdfs(args.hdfs_matrix)
+    bgl_x, bgl_y, bgl_ids = load_bgl(args.bgl_jsonl, args.window_size)
+    hdfs_splits = align_indices(hdfs_ids, hdfs_y, hdfs_table)
+    bgl_splits = align_indices(bgl_ids, bgl_y, bgl_table)
 
     results = {"hdfs_v1": {}, "bgl": {}}
     raw_runs = {"hdfs_v1": {}, "bgl": {}}
@@ -220,22 +238,26 @@ def main() -> int:
     for model_name in MODELS:
         hdfs_runs = []
         for seed in SEEDS:
-            train_idx, val_idx, test_idx = stratified_split(hdfs_y, seed)
             run = run_model(
                 model_name, hdfs_x, hdfs_y,
-                train_idx, val_idx, test_idx, seed,
+                hdfs_splits["train"],
+                hdfs_splits["validation"],
+                hdfs_splits["test"],
+                seed,
             )
             hdfs_runs.append(run)
         raw_runs["hdfs_v1"][model_name] = hdfs_runs
         results["hdfs_v1"][model_name] = aggregate(hdfs_runs)
 
-    train_idx, val_idx, test_idx = chronological_split(bgl_y)
     for model_name in MODELS:
         bgl_runs = []
         for seed in SEEDS:
             run = run_model(
                 model_name, bgl_x, bgl_y,
-                train_idx, val_idx, test_idx, seed,
+                bgl_splits["train"],
+                bgl_splits["validation"],
+                bgl_splits["test"],
+                seed,
             )
             bgl_runs.append(run)
         raw_runs["bgl"][model_name] = bgl_runs
@@ -248,7 +270,17 @@ def main() -> int:
             "runs": raw_runs,
             "seeds": list(SEEDS),
             "bgl_window_size": args.window_size,
-            "bgl_split": "chronological 80/10/10",
+            "protocol_version": protocol["protocol_version"],
+            "split_counts": {
+                "hdfs_v1": {
+                    split: len(indices)
+                    for split, indices in hdfs_splits.items()
+                },
+                "bgl": {
+                    split: len(indices)
+                    for split, indices in bgl_splits.items()
+                },
+            },
         }, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )

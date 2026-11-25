@@ -1,0 +1,58 @@
+{
+  "dataset": "HDFS",
+  "device": "mps",
+  "seed": 42,
+  "epochs": 5,
+  "window_size": 20,
+  "pos_weight": 22.668639053254438,
+  "threshold": 0.5,
+  "train_samples": 8000,
+  "test_samples": 2000,
+  "elapsed_seconds": 11.98361129197292,
+  "history": [
+    {
+      "epoch": 1,
+      "loss": 0.7584154934883117,
+      "precision": 0.05400696864111498,
+      "recall": 0.3668639053254438,
+      "f1": 0.09415337889141989
+    },
+    {
+      "epoch": 2,
+      "loss": 0.7449403991699218,
+      "precision": 0.058121019108280256,
+      "recall": 0.4319526627218935,
+      "f1": 0.10245614035087719
+    },
+    {
+      "epoch": 3,
+      "loss": 0.7310460604429245,
+      "precision": 0.06919275123558484,
+      "recall": 0.3727810650887574,
+      "f1": 0.11672070402964335
+    },
+    {
+      "epoch": 4,
+      "loss": 0.70456507396698,
+      "precision": 0.08080808080808081,
+      "recall": 0.5207100591715976,
+      "f1": 0.13990461049284578
+    },
+    {
+      "epoch": 5,
+      "loss": 0.6929504004716873,
+      "precision": 0.09024031387935262,
+      "recall": 0.5443786982248521,
+      "f1": 0.15481699621371478
+    }
+  ],
+  "test": {
+    "precision": 0.925,
+    "recall": 0.43529411764705883,
+    "f1": 0.592,
+    "positive_predictions": 40,
+    "true_positive": 37,
+    "true_normal": 1912
+  },
+  "checkpoint": "/Users/ruby/dev/code-papers-doing-copilot/LogFormer/checkpoints/logformer_smoke_hdfs_ep5.pt"
+}

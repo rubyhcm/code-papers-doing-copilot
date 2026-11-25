@@ -3,3 +3,5 @@ data/
 .venv/
 .venv312/
 analysis/
+LogFormer/preprocessed_data/BGL_training.npz
+LogFormer/preprocessed_data/sentence_transformer/model.safetensors

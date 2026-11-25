@@ -6,9 +6,12 @@
 LogRAG trên HDFS_v1 và BGL là bao nhiêu khi đánh giá theo cùng giao thức chia
 dữ liệu và truyền nhãn?
 
-**Giao thức:** Báo cáo kết quả ở cấp dòng và cấp nhóm khi phù hợp, đồng thời
-ghi positive prevalence và ngưỡng quyết định. Không so sánh trực tiếp điểm số
-công bố trong bài báo với kết quả mới nếu chưa ghi rõ split và cấp độ tổng hợp.
+**Giao thức:** Áp dụng [shared evaluation protocol v1](./07_shared_benchmark_protocol.md):
+HDFS đánh giá ở cấp block, BGL ở cửa sổ 200 record không chồng lấp; tất cả
+phương pháp dùng cùng sample IDs, nhãn và split. Chọn threshold trên validation,
+không dùng test để chọn tham số. Báo cáo positive prevalence, threshold và
+granularity. Không so sánh trực tiếp điểm số paper nếu chưa ghi rõ split và
+cấp độ tổng hợp.
 
 ## RQ2 — Chi phí tính toán
 

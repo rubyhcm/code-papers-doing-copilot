@@ -1,5 +1,19 @@
 # Tiến độ thực hiện ke_hoach_agent_executable.md
 
+## 2026-11-25
+
+- [x] Chốt shared benchmark protocol v1: HDFS theo BlockId, BGL theo cửa sổ
+  chronological 200 record; HDFS stratified 80/10/10 seed 42, BGL chrono
+  80/10/10.
+- [x] Sinh `data/splits/benchmark_protocol_v1/` và manifest; BGL bỏ 163 record
+  cuối không đủ cửa sổ.
+- [x] Kiểm tra toàn bộ LightAD input IDs/labels khớp manifest:
+  HDFS 575.061 block, BGL 23.739 window.
+- [x] LogFormer prep/trainer chuyển sang shared split, validation threshold;
+  synthetic end-to-end smoke và HDFS source ID/label alignment đã pass.
+- [ ] Chưa chạy embedding/preparation và full LogFormer training trên Kaggle;
+  các kết quả hiện tại vẫn là pilot, chưa được thay bằng protocol-v1 run.
+
 ## 2026-11-18
 
 - [x] TASK 1.1: Tóm tắt ba bài báo cốt lõi.
@@ -33,3 +47,12 @@
 - [x] Month 4 gate partial: RQ1-RQ3 LightAD đã hoàn thành; LogFormer/LogRAG vẫn blocked.
 - [x] Đã tạo Kaggle notebook full benchmark LightAD:
   `notebooks/logad_kaggle_full_benchmark.ipynb`.
+- [x] Đã chuẩn bị backbone SentenceTransformer 768 chiều cho LogFormer.
+- [x] LogFormer weighted 5-epoch smoke HDFS/BGL đã chạy; HDFS F1=0.5920,
+  BGL F1=0.2122. Full multi-seed training chưa hoàn tất.
+- [x] Đã tạo HDFS smoke 10.000 block và BGL full 237.398 window NPZ.
+- [x] LogFormer forward smoke pass HDFS/BGL với PyTorch 2.15 đã pass.
+- [x] Weighted 5-epoch smoke HDFS: loss giảm, test F1=0.592.
+- [x] Weighted 5-epoch smoke BGL: loss giảm, test F1=0.2122.
+- [x] Đã tạo Kaggle full-training notebook cho LogFormer:
+  `notebooks/logformer_kaggle_full_training.ipynb`.

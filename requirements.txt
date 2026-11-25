@@ -6,3 +6,4 @@ numpy
 matplotlib
 seaborn
 drain3==0.9.11
+sentence-transformers

@@ -1,0 +1,49 @@
+{
+  "model": "sentence-transformers/distilbert-base-nli-mean-tokens",
+  "embedding_dim": 768,
+  "checkpoint": "LogFormer/preprocessed_data/sentence_transformer",
+  "template_embeddings": "LogFormer/preprocessed_data/template_embeddings.npz",
+  "hdfs": {
+    "dataset": "hdfs_v1",
+    "blocks": 10000,
+    "training_blocks": 8000,
+    "testing_blocks": 2000,
+    "x_shape": [
+      10000,
+      20,
+      768
+    ],
+    "y_shape": [
+      10000,
+      2
+    ],
+    "dtype": "float16",
+    "anomaly_blocks": 423,
+    "training_path": "LogFormer/preprocessed_data/HDFS_training.npz",
+    "testing_path": "LogFormer/preprocessed_data/HDFS_testing.npz",
+    "window_size": 20,
+    "seed": 42,
+    "full_requested": false
+  },
+  "bgl": {
+    "dataset": "bgl",
+    "windows": 237398,
+    "training_windows": 189918,
+    "testing_windows": 47480,
+    "x_shape": [
+      237398,
+      20,
+      768
+    ],
+    "y_shape": [
+      237398,
+      2
+    ],
+    "dtype": "float16",
+    "anomaly_windows": 20261,
+    "training_path": "LogFormer/preprocessed_data/BGL_training.npz",
+    "testing_path": "LogFormer/preprocessed_data/BGL_testing.npz",
+    "window_size": 20,
+    "split": "chronological 80/20"
+  }
+}

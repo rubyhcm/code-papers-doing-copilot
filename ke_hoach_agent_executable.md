@@ -370,7 +370,7 @@ hdfs_stats, hdfs_templates, hdfs_anomalies = analyze_dataset(
 
 bgl_stats, bgl_templates, bgl_anomalies = analyze_dataset(
     'data/parsed/bgl_structured.jsonl',
-    'data/raw/bgl/labels.csv',
+    None,  # Nhãn line-level đã có trong trường 'label' của JSONL
     'BGL'
 )
 
@@ -1180,10 +1180,25 @@ with open('../../results/logformer_baseline.json', 'w') as f:
 ### 📋 TASK 3.3: Xây dựng data splitting scripts
 
 **Input:**
-- Parsed data
-- Paper splitting strategies
+- HDFS_v1 `Event_occurrence_matrix.csv`
+- BGL `data/parsed/bgl_structured.jsonl`
 
 **Actions:**
+
+**Lưu ý:** Ví dụ `scripts/split_data.py` cũ bên dưới chỉ là lịch sử, không
+dùng để tạo split cho benchmark mới. Giao thức có hiệu lực là
+[`methodology/07_shared_benchmark_protocol.md`](methodology/07_shared_benchmark_protocol.md).
+Sinh manifest chuẩn bằng:
+
+```bash
+python scripts/shared_benchmark_protocol.py
+```
+
+Manifest xác định HDFS ở cấp BlockId với stratified 80/10/10 (seed cố định
+42), BGL ở cửa sổ 200 record liên tiếp không overlap với split chronological
+80/10/10. Cả hai phương pháp phải dùng cùng sample IDs/labels. Ngưỡng được
+chọn từ validation; LogFormer `pos_weight` chỉ dùng thống kê train. Test không
+được dùng để chọn threshold hay hyperparameter.
 
 ```python
 # scripts/split_data.py
@@ -1272,22 +1287,31 @@ if __name__ == '__main__':
                'data/splits')
     
     split_bgl('data/parsed/bgl_structured.jsonl',
-              'data/raw/bgl/labels.csv',
-              'data/splits')
+              None,  # Nhãn lấy trực tiếp từ cột đầu BGL.log trong JSONL đã parse
+              'data/splits',
+              window_size=200,
+              seed=42)
 ```
 
+**Quy tắc nhãn BGL:**
+- Cột đầu `-` trong `BGL.log` -> `Normal`.
+- Cột đầu là alert category khác `-` -> `Anomaly`.
+- Window 200 dòng được gắn Anomaly nếu có ít nhất một dòng alert.
+- Không cần `data/raw/bgl/labels.csv` vì file này không tồn tại trong dataset.
+
 **Output:**
-- `data/splits/hdfs_{train,val,test}.csv`
-- `data/splits/bgl_{train,val,test}.csv`
-- `scripts/split_data.py`
-- `docs/data_splitting_protocol.md`
+- `data/splits/benchmark_protocol_v1/hdfs_v1.csv`
+- `data/splits/benchmark_protocol_v1/bgl.csv`
+- `data/splits/benchmark_protocol_v1/manifest.json`
+- `methodology/07_shared_benchmark_protocol.md`
 
 **Acceptance Criteria:**
-- [ ] 80/10/10 split verified
-- [ ] HDFS: No block ID overlap between sets
-- [ ] BGL: Chronological ordering preserved
-- [ ] Anomaly rates similar across splits (±2%)
-- [ ] Documentation complete
+- [x] Đơn vị đánh giá và label rule được định nghĩa cho hai dataset
+- [x] Quy tắc split cố định; BGL giữ thứ tự thời gian
+- [x] Các runner kiểm tra ID/label so với manifest chung
+- [x] Manifest thật được sinh; toàn bộ LightAD IDs/labels và HDFS source
+  IDs/labels được đối chiếu
+- [ ] Smoke-run từng phương pháp xác nhận dùng đúng cùng sample IDs
 
 **Estimated Time:** 4-6 hours
 
@@ -1892,7 +1916,7 @@ EOF
 ### ✅ THÁNG 3 DELIVERABLES CHECKLIST
 
 - [ ] `results/lightad_baseline.json` (partial: HDFS_v1 DT/KNN/SLFN; BGL blocked)
-- [ ] `results/logformer_baseline.json` (2 configurations)
+- [ ] `results/logformer_baseline.json` (chưa đủ full; smoke weighted HDFS/BGL đã chạy)
 - [ ] `results/lograg_baseline_full.json` (2 configurations)
 - [x] `data/splits/hdfs_{train,val,test}.npz`
 - [x] `data/splits/bgl_{train,val,test}.csv`
@@ -1901,6 +1925,7 @@ EOF
 - [ ] `scripts/sanity_check.py`
 - [x] `scripts/validate_reproduction.py`
 - [ ] `repos/LightAD/adapt_data.py`
+- [x] `scripts/prepare_logformer_embeddings.py`
 - [ ] `repos/LogFormer/adapt_data_logformer.py`
 - [x] `LogRAG/adapt_hdfs.py`
 - [ ] `repos/LogRAG/config_hdfs.yaml`
@@ -1909,6 +1934,12 @@ EOF
 - [x] `experiments/03_lograg_reproduction_report.md`
 - [x] `experiments/04_lograg_hdfs_extension.md`
 - [x] `experiments/05_validation_report.md`
+- [x] `results/rq1_lightad_results.json`
+- [x] `results/rq1_lightad_results.md`
+- [x] `thesis/tables/rq1_lightad.tex`
+- [x] `results/rq2_lightad_cost.json`
+- [x] `results/rq3_lightad_tradeoff.json`
+- [x] `reviews/month4_review.md`
 - [ ] `experiments/06_codebase_documentation.md`
 
 **Total Estimated Time:** 60-75 hours
@@ -1925,8 +1956,12 @@ _Tương ứng với T4 trong đề cương_
 
 **Input:**
 - Baselines from month 3
-- Test sets: `data/splits/*_test.csv`
+- Shared split tables: `data/splits/benchmark_protocol_v1/*.csv`
 - Evaluation script: `scripts/evaluate.py`
+
+**Gate trước benchmark:** Sinh và kiểm tra shared protocol v1. Không gộp kết
+quả pilot dùng split hoặc granularity cũ vào kết quả mới. Mỗi run phải lưu
+protocol version, sample counts, validation-selected threshold, seed và config.
 
 **Actions:**
 

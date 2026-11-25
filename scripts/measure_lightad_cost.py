@@ -10,16 +10,19 @@ import time
 from pathlib import Path
 
 import numpy as np
-import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import train_test_split
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.run_lightad_benchmark import load_bgl, load_hdfs
+from scripts.shared_benchmark_protocol import (
+    PROTOCOL_VERSION,
+    align_indices,
+    load_split_table,
+)
 
 
 def peak_rss_mb() -> float:
@@ -42,27 +45,6 @@ def make_model(name: str, seed: int = 42):
             random_state=seed,
         )
     raise ValueError(name)
-
-
-def hdfs_split(y: np.ndarray, seed: int = 42):
-    indices = np.arange(len(y))
-    train_idx, temp_idx = train_test_split(
-        indices, test_size=0.20, random_state=seed, stratify=y
-    )
-    val_idx, test_idx = train_test_split(
-        temp_idx, test_size=0.50, random_state=seed,
-        stratify=y[temp_idx]
-    )
-    del val_idx
-    return train_idx, test_idx
-
-
-def bgl_split(y: np.ndarray):
-    train_end = int(0.8 * len(y))
-    val_end = int(0.9 * len(y))
-    train_idx = np.arange(train_end)
-    test_idx = np.arange(val_end, len(y))
-    return train_idx, test_idx
 
 
 def measure(dataset: str, x: np.ndarray, y: np.ndarray,
@@ -97,21 +79,57 @@ def measure(dataset: str, x: np.ndarray, y: np.ndarray,
 
 
 def main() -> int:
-    hdfs_x, hdfs_y = load_hdfs(
+    protocol_dir = ROOT / "data/splits/benchmark_protocol_v1"
+    if not (protocol_dir / "manifest.json").exists():
+        raise FileNotFoundError(
+            f"Shared protocol missing at {protocol_dir}; "
+            "run scripts/shared_benchmark_protocol.py first."
+        )
+    protocol = json.loads(
+        (protocol_dir / "manifest.json").read_text(encoding="utf-8")
+    )
+    if protocol.get("protocol_version") != PROTOCOL_VERSION:
+        raise ValueError(
+            f"Expected protocol {PROTOCOL_VERSION}, found "
+            f"{protocol.get('protocol_version')!r}."
+        )
+    hdfs_x, hdfs_y, hdfs_ids = load_hdfs(
         ROOT / "data/raw/hdfs_v1/preprocessed/Event_occurrence_matrix.csv"
     )
-    hdfs_train, hdfs_test = hdfs_split(hdfs_y)
+    hdfs_splits = align_indices(
+        hdfs_ids,
+        hdfs_y,
+        load_split_table(protocol_dir, "hdfs_v1"),
+    )
+    hdfs_train, hdfs_test = hdfs_splits["train"], hdfs_splits["test"]
     hdfs_cost = measure("hdfs_v1", hdfs_x, hdfs_y, hdfs_train, hdfs_test)
 
-    bgl_x, bgl_y = load_bgl(
+    bgl_x, bgl_y, bgl_ids = load_bgl(
         ROOT / "data/parsed/bgl_structured.jsonl",
         200,
     )
-    bgl_train, bgl_test = bgl_split(bgl_y)
+    bgl_splits = align_indices(
+        bgl_ids,
+        bgl_y,
+        load_split_table(protocol_dir, "bgl"),
+    )
+    bgl_train, bgl_test = bgl_splits["train"], bgl_splits["test"]
     bgl_cost = measure("bgl", bgl_x, bgl_y, bgl_train, bgl_test)
 
-    result = {"hdfs_v1": hdfs_cost, "bgl": bgl_cost}
-    output = ROOT / "results/rq2_lightad_cost.json"
+    result = {
+        "protocol_version": protocol["protocol_version"],
+        "split_counts": {
+            "hdfs_v1": {
+                split: len(indices) for split, indices in hdfs_splits.items()
+            },
+            "bgl": {
+                split: len(indices) for split, indices in bgl_splits.items()
+            },
+        },
+        "hdfs_v1": hdfs_cost,
+        "bgl": bgl_cost,
+    }
+    output = ROOT / "results/rq2_lightad_cost_shared_protocol_v1.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         json.dumps(result, indent=2, ensure_ascii=False) + "\n",

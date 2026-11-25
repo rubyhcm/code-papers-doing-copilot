@@ -1,0 +1,58 @@
+{
+  "dataset": "BGL",
+  "device": "mps",
+  "seed": 42,
+  "epochs": 5,
+  "window_size": 20,
+  "pos_weight": 17.726591760299627,
+  "threshold": 0.5,
+  "train_samples": 10000,
+  "test_samples": 47480,
+  "elapsed_seconds": 20.232293750043027,
+  "history": [
+    {
+      "epoch": 1,
+      "loss": 0.7831593284941023,
+      "precision": 0.05444261135988687,
+      "recall": 0.43258426966292135,
+      "f1": 0.0967134184634708
+    },
+    {
+      "epoch": 2,
+      "loss": 0.7600842721902641,
+      "precision": 0.06435366536094013,
+      "recall": 0.4307116104868914,
+      "f1": 0.11197663096397274
+    },
+    {
+      "epoch": 3,
+      "loss": 0.7673626642697936,
+      "precision": 0.06200154360689478,
+      "recall": 0.45131086142322097,
+      "f1": 0.10902510744175525
+    },
+    {
+      "epoch": 4,
+      "loss": 0.7628249453890855,
+      "precision": 0.06569569259374032,
+      "recall": 0.3970037453183521,
+      "f1": 0.1127359744748737
+    },
+    {
+      "epoch": 5,
+      "loss": 0.7482704573376163,
+      "precision": 0.06993464052287582,
+      "recall": 0.40074906367041196,
+      "f1": 0.11908736783528102
+    }
+  ],
+  "test": {
+    "precision": 0.11874134177716208,
+    "recall": 0.9963467286615743,
+    "f1": 0.2121940868581129,
+    "positive_predictions": 25265,
+    "true_positive": 3000,
+    "true_normal": 22204
+  },
+  "checkpoint": "/Users/ruby/dev/code-papers-doing-copilot/LogFormer/checkpoints/logformer_smoke_bgl_ep5.pt"
+}
