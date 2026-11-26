@@ -77,7 +77,6 @@ class RAGPostProcessor:
                 temperature=0,
                 num_ctx=self.ollama_num_ctx,
                 num_predict=self.ollama_num_predict,
-                format="json",
             )
         if self.llm_backend == "transformers":
             llm = self.get_local_llm(llm_name)

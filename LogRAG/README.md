@@ -159,15 +159,22 @@ CUDA-enabled PyTorch:
 pip install -r requirements-kaggle.txt
 ```
 
-Enable Internet and a GPU accelerator in Kaggle. The notebook installs and
-starts Ollama, then pulls
+Enable Internet and a GPU accelerator in Kaggle. The notebook installs `zstd`
+if missing, installs and starts Ollama, then pulls
 `hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:Q4_K_M` from Hugging Face. It
 uses `sentence-transformers/all-MiniLM-L6-v2` for local embeddings, so this
 configuration does not require an API key. This embedding choice changes the
 retrieval component from the previous OpenAI embedding setup and should be
 reported as such in thesis results. The 4-bit Mistral download and inference
-consume Kaggle storage/GPU runtime. If switching to OpenAI, supply the key as a
-Kaggle Secret; never put credentials in this repository. Then set:
+consume Kaggle storage/GPU runtime.
+
+The Ollama request uses prompt-based JSON output instead of constrained
+`format: "json"` because the Kaggle Ollama runtime returned a sampler
+initialization error for that mode; the pipeline still parses and repairs
+non-JSON model output.
+
+If switching to OpenAI, supply the key as a Kaggle Secret; never put
+credentials in this repository. Then set:
 
 ```text
 LOGRAG_STRUCTURED_CSV=/kaggle/input/<dataset>/BGL.log_structured.csv

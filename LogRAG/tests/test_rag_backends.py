@@ -25,7 +25,6 @@ class RAGBackendTests(unittest.TestCase):
             temperature=0,
             num_ctx=4096,
             num_predict=512,
-            format="json",
         )
         self.assertIs(result, chat_ollama.return_value)
 
