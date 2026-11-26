@@ -1,9 +1,9 @@
 \chapter{Phương pháp nghiên cứu}
 
 \section{Thiết kế nghiên cứu}
-Nghiên cứu sử dụng thiết kế thực nghiệm empiral, trả lời RQ1-RQ4 bằng benchmark
-thống nhất trên ba phương pháp và hai dataset. Kết quả được so sánh trong cùng
-giao thức split, metric và phần cứng khi khả thi.
+Nghiên cứu sử dụng thiết kế thực nghiệm, trả lời RQ1-RQ4 bằng benchmark thống
+nhất trên ba phương pháp và hai dataset. Kết quả được so sánh trong cùng giao
+thức split và metric. Thời gian chạy được báo cáo riêng theo môi trường đo.
 
 \section{Câu hỏi nghiên cứu}
 \subsection{RQ1: Hiệu quả phát hiện}
@@ -20,16 +20,25 @@ lời giải thích bằng rubric mù.
 \section{Pipeline thực nghiệm}
 \begin{enumerate}
   \item Thu thập HDFS\_v1 và BGL.
-  \item Parse bằng Drain hoặc chuyển structured CSV.
+  \item Parse log và chuyển về biểu diễn có cấu trúc.
   \item Gom theo block HDFS hoặc window/line BGL.
-  \item Chia train/validation/test không rò rỉ.
+  \item Chia train/validation/test theo shared benchmark protocol v1.
   \item Huấn luyện, suy luận, đo metric và chi phí.
 \end{enumerate}
 
 \subsection{Chia dữ liệu}
-HDFS\_v1 chia theo block ID để các dòng cùng block không nằm ở hai split.
-BGL dùng chronological split hoặc window split để giữ tính thời gian. Tỷ lệ
-đăng ký là 80/10/10 nếu dữ liệu và giao thức cho phép.
+HDFS\_v1 được chia stratified theo \texttt{BlockId} với tỷ lệ 80/10/10 và seed
+cố định 42; mỗi block chỉ xuất hiện trong một split. Bộ benchmark gồm 460.048
+block train, 57.506 block validation và 57.507 block test.
+
+BGL được gom thành các cửa sổ không chồng lấp, mỗi cửa sổ 200 record, rồi chia
+chronological 80/10/10. Có 18.991 cửa sổ train, 2.374 validation và 2.374 test;
+163 record cuối không đủ tạo một cửa sổ hoàn chỉnh nên bị bỏ. Một cửa sổ được
+gán nhãn anomaly nếu có ít nhất một record anomaly.
+
+Trong lần chạy hiện tại, Drain3 parse toàn bộ BGL trước khi chia theo thời gian.
+Parser không sử dụng nhãn, nhưng đã nhìn thấy nội dung log thuộc validation và
+test; do đó bước này là tiền xử lý transductive. Đây là giới hạn cần công khai.
 
 \subsection{Chỉ số}
 \[
@@ -51,8 +60,10 @@ Ghi CPU/GPU, RAM, hệ điều hành, CUDA/MPS, driver và phiên bản thư vi�
 Chạy warm-up trước phép đo latency.
 
 \subsection{Seed và lặp lại}
-Seed kế hoạch: 42, 123, 456, 789 và 2024. Phương pháp ngẫu nhiên báo cáo mean
-$\pm$ standard deviation thay vì chọn seed cho ra kết quả đẹp nhất.
+Các model seed: 42, 123, 456, 789 và 2024. HDFS dùng split seed cố định 42;
+split BGL được xác định theo thứ tự thời gian. Kết quả LightAD báo cáo mean
+$\pm$ sample standard deviation trên năm seed, không chọn seed cho kết quả đẹp
+nhất.
 
 \subsection{Hyperparameter}
 Ưu tiên cấu hình mặc định của paper. Chỉ tune trên validation. Không điều
@@ -61,3 +72,7 @@ chỉnh hyperparameter bằng test set.
 \section{Giao thức tái lập}
 Lưu commit hash, checksum dataset, cấu hình parser, split, model config, raw
 predictions, hardware profile và script tạo bảng/figure.
+
+Kết quả LightAD của shared benchmark protocol v1 và manifest được lưu cùng
+artifact thực nghiệm; số liệu chi tiết và các giới hạn diễn giải được trình
+bày trong báo cáo kết quả.

@@ -9,7 +9,8 @@
 - Đã viết bản nháp Chương 2 phần phát hiện bất thường.
 - Đã viết bản nháp Chương 3 phương pháp nghiên cứu.
 - Đã tạo `environment.yml`, script verification và tài liệu môi trường.
-- Đã compile `thesis/thesis_draft_v3.pdf`.
+- Bản nháp lúc đó đã compile; entrypoint hiện hành là `thesis/main.tex`, PDF
+  hiện hành là `thesis/thesis.pdf`.
 
 ## Trạng thái môi trường
 

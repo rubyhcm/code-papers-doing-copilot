@@ -30,7 +30,9 @@ Các thư mục/chương Tháng 1 thiếu ở đầu phiên làm việc đã đ�
 - Không dùng HDFS_v3 hoặc TraceBench trong benchmark.
 - Không coi nhãn HDFS_v1 ở cấp dòng là nhãn độc lập.
 - Không suy ra nhãn BGL từ mức `FATAL/WARN`.
-- PDF/thesis v1 cần bổ sung template chính thức của trường trước nộp.
+- Bản thảo cũ đã được thay bằng nguồn luận văn hiện hành
+  `thesis/main.tex` và PDF build `thesis/thesis.pdf`; vẫn cần bổ sung template
+  chính thức của trường trước khi nộp.
 
 ## Gate cho Tháng 2
 

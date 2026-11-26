@@ -1,17 +1,43 @@
-\chapter{Kết quả thực nghiệm sơ bộ}
+\chapter{Kết quả thực nghiệm LightAD}
 
-\section{Kết quả HDFS\_v1}
-Ba mô hình LightAD đều đạt F1 gần 1.0 trên split block HDFS\_v1 ở năm seed.
-Biến thiên giữa seed nhỏ, nhưng kết quả cần kiểm tra chất lượng split, duplicate
-block và khả năng dữ liệu leak trước khi công bố final.
+\section{Giao thức và phạm vi}
+LightAD được đánh giá theo shared benchmark protocol v1 với năm model seed
+(42, 123, 456, 789, 2024). HDFS\_v1 gồm 460.048/57.506/57.507 block cho
+train/validation/test, chia stratified theo \texttt{BlockId} với split seed
+42. BGL được chia chronological trên các cửa sổ 200 record, lần lượt có
+18.991/2.374/2.374 cửa sổ. Ngưỡng phân loại được chọn trên validation; test
+chỉ dùng để đánh giá cuối. Bảng \ref{tab:rq1_lightad} báo cáo mean $\pm$ sample
+standard deviation trên năm seed.
 
-\section{Kết quả BGL}
-BGL được đánh giá trên fixed window 200 dòng theo chronological split.
-Decision Tree đạt precision và FPR tốt nhưng recall thấp. KNN đạt recall cao
-nhưng FPR cao. SLFN có F1 trung gian nhưng biến thiên lớn giữa seed.
+\section{RQ1: Hiệu quả phát hiện}
+Kết quả HDFS\_v1 rất cao: DT đạt F1 0.999644, KNN 0.998812 và SLFN 0.997503.
+Trên BGL, SLFN đạt F1 trung bình cao nhất (0.542315), tiếp theo là DT
+(0.489171) và KNN (0.232538). BGL khó hơn đáng kể; DT có precision 1.0 nhưng
+recall 0.323, còn KNN có recall 0.873 nhưng FPR 0.837. Vì vậy, không nên xếp
+hạng mô hình chỉ theo recall.
 
-\section{Chi phí tính toán}
-Decision Tree train nhanh; KNN inference chậm trên HDFS\_v1; SLFN train lâu
-nhất trong ba mô hình. Các giá trị chi tiết được trình bày trong bảng.
+\section{RQ2: Chi phí tính toán}
+DT có thời gian huấn luyện trung bình thấp hơn SLFN trên cả hai dataset. KNN
+có chi phí suy luận cao nhất: trung bình 57.061 giây trên test HDFS\_v1 và
+1.069 giây trên test BGL. Các giá trị thời gian là đặc trưng cho lần chạy
+Kaggle này; artifact không ghi đủ thông tin phần cứng hoặc peak memory để dùng
+cho so sánh giữa các môi trường.
+
+\section{RQ3: Đánh đổi hiệu quả và độ trễ}
+Khi xét mean F1 và latency trung bình trên mỗi mẫu, DT trội hơn KNN và SLFN
+trên HDFS\_v1. Trên BGL, DT và SLFN nằm trên Pareto frontier: DT có latency
+thấp hơn, còn SLFN có F1 cao hơn. KNN bị trội bởi cả hai mô hình trên BGL.
+
+\section{Giới hạn diễn giải}
+Tỷ lệ anomaly của BGL thay đổi theo thời gian: khoảng 11.61\% ở train, 7.33\%
+ở validation và 12.93\% ở test. Ngoài ra, Drain3 được chạy trên toàn bộ luồng
+BGL trước khi tạo split; nhãn không được dùng để parse nhưng log test đã được
+quan sát trong bước tiền xử lý. Cần mô tả đây là đánh giá transductive hoặc
+chạy thêm quy trình fit parser chỉ trên train để đánh giá inductive nghiêm
+ngặt. F1 HDFS gần 1.0 cũng cần được trình bày cùng kiểm tra leakage; riêng
+metric không chứng minh có hay không có leakage.
+
+Các kết quả trong chương này chỉ hoàn tất benchmark LightAD. Chưa đủ cơ sở để
+kết luận so sánh cuối cùng với full LogFormer/LogRAG hoặc reproduction bài báo.
 
 \input{thesis/tables/rq1_rq3_lightad.tex}

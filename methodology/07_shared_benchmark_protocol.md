@@ -73,9 +73,12 @@ Artifacts:
    window size of 200.
 3. Run LightAD and LogFormer; both runners validate IDs and labels against the
    common tables. Use model seeds only for training randomness.
-4. Keep old results under their existing filenames as pilot data. Protocol-v1
-   output files use a distinct name and are the only results eligible for a
-   new cross-method aggregate.
+4. Treat earlier split/granularity results as historical pilot data. The
+   current LightAD result source is
+   `kaggle-lightad-result/lightad_full_benchmark_results_shared_protocol_v1.json`;
+   the consolidated report is `results/lightad_shared_protocol_v1.md`. Only
+   results validated against the shared tables are eligible for a cross-method
+   aggregate.
 
 This aligns sample units, labels, and evaluation sets; it does not make model
 feature extraction or training algorithms identical. Any paper-reproduction

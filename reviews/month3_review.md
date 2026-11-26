@@ -1,5 +1,10 @@
 # Review Tháng 3
 
+> Trạng thái dưới đây ghi nhận tại thời điểm review. Cập nhật 2026-11-26:
+> LightAD đã hoàn tất benchmark Kaggle theo shared benchmark protocol v1; xem
+> [`results/lightad_shared_protocol_v1.md`](../results/lightad_shared_protocol_v1.md).
+> Các mục LogFormer/LogRAG bên dưới vẫn là giới hạn hiện tại.
+
 ## Đã hoàn thành
 
 - HDFS_v1 split block stratified 80/10/10, seed 42.

@@ -490,7 +490,7 @@ For each RQ:
 **Output:**
 - `thesis/chapters/01_introduction.tex` (~15-20 pages)
 - `thesis/chapters/02_background_part1.tex` (~10-12 pages)
-- Compiled PDF: `thesis/thesis_draft_v1.pdf`
+- Compiled PDF: `thesis/thesis.pdf` (current canonical build)
 
 **Format:** LaTeX using thesis template
 
@@ -551,7 +551,7 @@ For each RQ:
 - [x] `methodology/research_questions.md`
 - [x] `thesis/chapters/01_introduction.tex`
 - [x] `thesis/chapters/02_background_part1.tex`
-- [x] `thesis/thesis_draft_v1.pdf`
+- [x] `thesis/thesis.pdf` (current canonical build)
 
 **Total Estimated Time:** 80-100 hours (~20-25 hours/week over 4 weeks)
 
@@ -942,7 +942,7 @@ Write Chapter 3 (15-20 pages):
 **Output:**
 - `thesis/chapters/03_methodology.tex` (~15-20 pages)
 - `figures/pipeline_diagram.pdf`
-- Updated `thesis/thesis_draft_v3.pdf`
+- Updated `thesis/thesis.pdf`
 
 **Acceptance Criteria:**
 - [ ] All RQs detailed
@@ -968,7 +968,7 @@ Write Chapter 3 (15-20 pages):
 - [x] `docs/environment_setup.md`
 - [x] `thesis/chapters/03_methodology.tex`
 - [x] `figures/pipeline_diagram.svg`
-- [x] `thesis/thesis_draft_v3.pdf`
+- [x] `thesis/thesis.pdf`
 
 **Total Estimated Time:** 70-85 hours
 
@@ -1934,11 +1934,10 @@ EOF
 - [x] `experiments/03_lograg_reproduction_report.md`
 - [x] `experiments/04_lograg_hdfs_extension.md`
 - [x] `experiments/05_validation_report.md`
-- [x] `results/rq1_lightad_results.json`
-- [x] `results/rq1_lightad_results.md`
+- [x] `kaggle-lightad-result/lightad_full_benchmark_results_shared_protocol_v1.json`
+- [x] `results/lightad_shared_protocol_v1.md`
 - [x] `thesis/tables/rq1_lightad.tex`
-- [x] `results/rq2_lightad_cost.json`
-- [x] `results/rq3_lightad_tradeoff.json`
+- [x] RQ2 runtime and RQ3 Pareto included in `results/lightad_shared_protocol_v1.md`
 - [x] `reviews/month4_review.md`
 - [ ] `experiments/06_codebase_documentation.md`
 

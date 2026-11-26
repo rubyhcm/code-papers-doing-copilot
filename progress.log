@@ -1,5 +1,16 @@
 # Tiến độ thực hiện ke_hoach_agent_executable.md
 
+## 2026-11-26
+
+- [x] LightAD full benchmark trên Kaggle theo shared benchmark protocol v1:
+  HDFS_v1 và BGL, DT/KNN/SLFN, năm seed.
+- [x] Xác minh JSON/CSV summary khớp 30 lượt chạy; split counts khớp manifest.
+- [x] Cập nhật báo cáo LightAD và bảng RQ1-RQ3 trong nguồn luận văn.
+- [ ] Audit feature/label leakage cho HDFS và chạy thêm BGL inductive parse
+  (fit Drain3 chỉ trên train) nếu cần đánh giá inductive nghiêm ngặt.
+- [ ] Chạy benchmark full nhiều seed cho LogFormer; LogRAG vẫn blocked do
+  thiếu pretrained model/LLM backend.
+
 ## 2026-11-25
 
 - [x] Chốt shared benchmark protocol v1: HDFS theo BlockId, BGL theo cửa sổ
@@ -11,8 +22,8 @@
   HDFS 575.061 block, BGL 23.739 window.
 - [x] LogFormer prep/trainer chuyển sang shared split, validation threshold;
   synthetic end-to-end smoke và HDFS source ID/label alignment đã pass.
-- [ ] Chưa chạy embedding/preparation và full LogFormer training trên Kaggle;
-  các kết quả hiện tại vẫn là pilot, chưa được thay bằng protocol-v1 run.
+- [ ] Tại thời điểm này chưa chạy embedding/preparation và full LogFormer
+  training trên Kaggle. LightAD đã được chạy theo protocol v1 vào 2026-11-26.
 
 ## 2026-11-18
 

@@ -2,18 +2,32 @@
 
 \begin{table}[ht]
 \centering
-\caption{Chi phí tính toán LightAD sơ bộ}
+\caption{Chi phí LightAD trên shared benchmark protocol v1}
 \label{tab:rq2_lightad}
 \begin{tabular}{llrrr}
 \toprule
-Dataset & Mô hình & Train (s) & Inference (s) & Latency/test (ms) \\
+Dataset & Mô hình & Train (s) & Inference (s) & Latency/mẫu (ms) \\
 \midrule
-HDFS\_v1 & DT & 0.307698 & 0.006858 & 0.000119 \\
-HDFS\_v1 & KNN & 0.048526 & 6.288217 & 0.109347 \\
-HDFS\_v1 & SLFN & 4.417464 & 0.007635 & 0.000133 \\
-BGL & DT & 0.469191 & 0.001158 & 0.000488 \\
-BGL & KNN & 0.003962 & 0.122019 & 0.051398 \\
-BGL & SLFN & 2.052090 & 0.000874 & 0.000368 \\
+HDFS\_v1 & DT & 0.749175 & 0.008536 & 0.000148 \\
+HDFS\_v1 & KNN & 0.049092 & 57.060846 & 0.992242 \\
+HDFS\_v1 & SLFN & 10.772229 & 0.015375 & 0.000267 \\
+BGL & DT & 1.320483 & 0.001525 & 0.000642 \\
+BGL & KNN & 0.011731 & 1.068568 & 0.450113 \\
+BGL & SLFN & 8.188049 & 0.003435 & 0.001447 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Pareto frontier giữa mean F1 và latency trung bình}
+\label{tab:rq3_lightad}
+\begin{tabular}{lll}
+\toprule
+Dataset & Mô hình trên frontier & Mô hình bị trội \\
+\midrule
+HDFS\_v1 & DT & KNN, SLFN \\
+BGL & DT, SLFN & KNN \\
 \bottomrule
 \end{tabular}
 \end{table}

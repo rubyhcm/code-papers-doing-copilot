@@ -1,5 +1,10 @@
 # Báo cáo tái lập LightAD trên HDFS_v1
 
+> Đây là một baseline lịch sử chạy local với một seed, không phải kết quả
+> shared benchmark protocol v1 mới nhất. Dùng
+> [`results/lightad_shared_protocol_v1.md`](../results/lightad_shared_protocol_v1.md)
+> cho kết quả so sánh hiện tại; không gộp các số liệu của hai lần chạy.
+
 ## Kịch bản
 
 - Dataset: HDFS_v1.
@@ -29,3 +34,7 @@ Kết quả chưa được coi là kết quả paper reproduction cho đến khi
 - kiểm tra split cũ/gốc,
 - chạy nhiều seed,
 - ghi đầy đủ dependency/hardware.
+
+Benchmark năm seed mới hoàn tất theo shared benchmark protocol v1 nhưng vẫn
+không tự động xác nhận reproduction bài báo; việc đối chiếu paper và audit
+leakage vẫn là các bước riêng.
