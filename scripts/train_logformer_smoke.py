@@ -123,6 +123,36 @@ def main() -> int:
         y_test = test_data["y"]
         test_ids = test_data["sample_ids"].astype(str)
 
+    embedding_matrix = None
+    if x_train.ndim == 2:
+        if not np.issubdtype(x_train.dtype, np.integer):
+            raise ValueError("Compact template sequences must contain integer IDs")
+        embedding_path = preprocessed_dir / "template_embeddings.npz"
+        if not embedding_path.exists():
+            parser.error(f"Template embedding matrix not found: {embedding_path}")
+        with np.load(embedding_path) as embedding_data:
+            embedding_matrix = embedding_data["embeddings"].astype(
+                np.float32,
+                copy=True,
+            )
+        if embedding_matrix.ndim != 2 or embedding_matrix.shape[1] != 768:
+            raise ValueError("Template embeddings must have shape [templates, 768]")
+        for split_name, sequences in (
+            ("train", x_train),
+            ("validation", x_validation),
+            ("test", x_test),
+        ):
+            if sequences.ndim != 2 or not np.issubdtype(sequences.dtype, np.integer):
+                raise ValueError(
+                    f"{split_name} data must contain integer template IDs"
+                )
+            if sequences.size and (
+                sequences.min() < 0 or sequences.max() >= len(embedding_matrix)
+            ):
+                raise ValueError(
+                    f"{split_name} data contains IDs outside the embedding matrix"
+                )
+
     validate_samples_for_split(
         train_ids, y_train.argmax(axis=1), split_table, "train"
     )
@@ -146,19 +176,19 @@ def main() -> int:
         y_train = y_train[:args.max_train_samples]
 
     train_loader = DataLoader(
-        DataGenerator(x_train, y_train, args.window_size),
+        DataGenerator(x_train, y_train, args.window_size, embedding_matrix),
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=0,
     )
     validation_loader = DataLoader(
-        DataGenerator(x_validation, y_validation, args.window_size),
+        DataGenerator(x_validation, y_validation, args.window_size, embedding_matrix),
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=0,
     )
     test_loader = DataLoader(
-        DataGenerator(x_test, y_test, args.window_size),
+        DataGenerator(x_test, y_test, args.window_size, embedding_matrix),
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=0,

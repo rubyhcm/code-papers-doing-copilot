@@ -6,12 +6,21 @@ EMBEDDING_DIM = 768
 
 
 class DataGenerator(Dataset):
-    def __init__(self, x, y, window_size):
+    def __init__(self, x, y, window_size, embedding_matrix=None):
         'Initialization'
         self.x = x
         self.y = y
         self.window_size = window_size
-        # self.batch_size = batch_size
+        self.embedding_matrix = embedding_matrix
+        if embedding_matrix is not None:
+            if x.ndim != 2:
+                raise ValueError("Template-ID sequences must have shape [samples, sequence]")
+            if embedding_matrix.ndim != 2 or embedding_matrix.shape[1] != EMBEDDING_DIM:
+                raise ValueError(
+                    f"Embedding matrix must have shape [templates, {EMBEDDING_DIM}]"
+                )
+            if x.size and (x.min() < 0 or x.max() >= len(embedding_matrix)):
+                raise ValueError("Template ID is outside the embedding matrix")
 
     def __len__(self):
         'Denotes the number of batches'
@@ -23,8 +32,8 @@ class DataGenerator(Dataset):
         # y = self.y[index * self.batch_size:(index + 1) * self.batch_size]
         x = self.x[index]
         y = self.y[index]
-        # x = pad_sequences(x, dtype='object', padding='post',
-        #                   value=np.zeros(EMBEDDING_DIM)).astype(np.float32)
+        if self.embedding_matrix is not None:
+            x = self.embedding_matrix[x]
 
         # 最大设置为40暂定不需要最大number的
         num_tokens = x.shape[0]
@@ -32,7 +41,7 @@ class DataGenerator(Dataset):
 
         mix_num_boxes = min(int(num_tokens), self.window_size)
         # # mix_boxes_pad = np.zeros((self._max_region_num, 5))
-        mix_features_pad = np.zeros((self.window_size, 768))
+        mix_features_pad = np.zeros((self.window_size, EMBEDDING_DIM), dtype=np.float32)
         mix_features_pad[:mix_num_boxes] = x[:mix_num_boxes]
         x = mix_features_pad
         # print(x.shape)

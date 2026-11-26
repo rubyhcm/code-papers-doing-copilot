@@ -8,6 +8,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Iterable
 
 import numpy as np
 import pandas as pd
@@ -28,23 +29,34 @@ DEFAULT_MODEL = "sentence-transformers/distilbert-base-nli-mean-tokens"
 
 
 def encode_templates(
-    templates: list[str],
+    templates: Iterable[object],
     model_name: str,
     output_dir: Path,
-) -> tuple[SentenceTransformer, dict[str, np.ndarray]]:
+) -> tuple[SentenceTransformer, dict[str, int], np.ndarray]:
     model = SentenceTransformer(model_name)
-    unique_templates = sorted(set(template for template in templates
-                                 if isinstance(template, str) and template.strip()))
-    embeddings = model.encode(
+    unique_templates = sorted({
+        template for template in templates
+        if isinstance(template, str) and template.strip()
+    })
+    if not unique_templates:
+        raise ValueError("No non-empty templates were found to encode")
+
+    template_ids = {
+        template: index + 1
+        for index, template in enumerate(unique_templates)
+    }
+    embedding_dim = model.get_embedding_dimension()
+    embedding_matrix = np.zeros(
+        (len(unique_templates) + 1, embedding_dim),
+        dtype=np.float16,
+    )
+    template_vectors = model.encode(
         unique_templates,
         convert_to_numpy=True,
         normalize_embeddings=True,
         show_progress_bar=True,
     )
-    template_map = {
-        template: embedding.astype(np.float16)
-        for template, embedding in zip(unique_templates, embeddings)
-    }
+    embedding_matrix[1:] = template_vectors.astype(np.float16)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     backbone_dir = output_dir / "sentence_transformer"
@@ -52,43 +64,54 @@ def encode_templates(
 
     np.savez_compressed(
         output_dir / "template_embeddings.npz",
-        templates=np.asarray(unique_templates, dtype=object),
-        embeddings=embeddings.astype(np.float16),
+        templates=np.asarray([""] + unique_templates, dtype=object),
+        embeddings=embedding_matrix,
     )
-    return model, template_map
+    return model, template_ids, embedding_matrix
 
 
 def prepare_hdfs(
     traces_path: Path,
     labels_path: Path,
     templates_path: Path,
-    template_map: dict[str, np.ndarray],
+    template_ids: dict[str, int],
     output_dir: Path,
     protocol_dir: Path,
     sequence_length: int,
     max_blocks: int,
 ) -> dict:
-    template_df = pd.read_csv(templates_path)
-    event_template_map = dict(zip(template_df["EventId"],
-                                  template_df["EventTemplate"]))
-    event_template_map = {
-        str(event_id): template_map.get(str(template), np.zeros(768, np.float16))
-        for event_id, template in event_template_map.items()
+    template_df = pd.read_csv(
+        templates_path,
+        usecols=["EventId", "EventTemplate"],
+        dtype={"EventId": "string", "EventTemplate": "string"},
+    )
+    event_template_ids = {
+        str(event_id): template_ids.get(str(template), 0)
+        for event_id, template in zip(
+            template_df["EventId"],
+            template_df["EventTemplate"],
+        )
     }
 
-    traces = pd.read_csv(traces_path)
-    labels = pd.read_csv(labels_path)
+    traces = pd.read_csv(
+        traces_path,
+        usecols=["BlockId", "Features"],
+        dtype={"BlockId": "string", "Features": "string"},
+    )
+    labels = pd.read_csv(
+        labels_path,
+        usecols=["BlockId", "Label"],
+        dtype={"BlockId": "string", "Label": "string"},
+    )
     label_by_id = dict(zip(labels["BlockId"], labels["Label"]))
 
-    block_ids = list(dict.fromkeys(traces["BlockId"].tolist()))
     if max_blocks:
+        block_ids = traces["BlockId"].dropna().drop_duplicates().tolist()
         block_ids = block_ids[:max_blocks]
-
-    kept_block_ids = set(block_ids)
-    grouped = traces[traces["BlockId"].isin(kept_block_ids)].groupby(
-        "BlockId",
-        sort=False,
-    )
+        selected_traces = traces[traces["BlockId"].isin(set(block_ids))]
+    else:
+        selected_traces = traces
+    grouped = selected_traces.groupby("BlockId", sort=False)
 
     x_data = []
     y_data = []
@@ -102,20 +125,18 @@ def prepare_hdfs(
             " ".join(block["Features"].dropna().astype(str).tolist()),
         )
         event_ids = event_ids[:sequence_length]
-        sequence = [
-            event_template_map.get(event_id, np.zeros(768, np.float16))
-            for event_id in event_ids
-        ]
+        sequence = [event_template_ids.get(event_id, 0) for event_id in event_ids]
         if not sequence:
             continue
-        padded = np.zeros((sequence_length, 768), dtype=np.float16)
-        padded[:len(sequence)] = np.asarray(sequence, dtype=np.float16)
+        padded = np.zeros(sequence_length, dtype=np.int32)
+        padded[:len(sequence)] = sequence
         x_data.append(padded)
         y_data.append([1, 0] if label == "Normal" else [0, 1])
         kept_ids.append(block_id)
 
-    x_array = np.asarray(x_data, dtype=np.float16)
+    x_array = np.asarray(x_data, dtype=np.int32)
     y_array = np.asarray(y_data, dtype=np.int64)
+    kept_ids = np.asarray(kept_ids, dtype=str)
     split_table = load_split_table(protocol_dir, "hdfs_v1")
     split_indices = align_indices(
         kept_ids,
@@ -137,7 +158,7 @@ def prepare_hdfs(
             path,
             x=x_array[indices],
             y=y_array[indices],
-            sample_ids=np.asarray(kept_ids, dtype=str)[indices],
+            sample_ids=kept_ids[indices],
         )
         paths[split] = str(path)
 
@@ -150,7 +171,8 @@ def prepare_hdfs(
         },
         "x_shape": list(x_array.shape),
         "y_shape": list(y_array.shape),
-        "dtype": "float16",
+        "dtype": "int32",
+        "sequence_representation": "template_ids",
         "anomaly_blocks": int(y_array[:, 1].sum()),
         "split_paths": paths,
         "sequence_length": sequence_length,
@@ -161,31 +183,44 @@ def prepare_hdfs(
 
 def prepare_bgl(
     parsed_path: Path,
-    template_map: dict[str, np.ndarray],
+    template_ids: dict[str, int],
     output_dir: Path,
     protocol_dir: Path,
     window_size: int,
 ) -> dict:
-    records = pd.read_json(parsed_path, lines=True)
     template_sequences = []
     labels = []
     sample_ids = []
+    current_ids = []
+    current_anomaly = False
+    records_read = 0
 
-    for start in range(0, len(records) - window_size + 1, window_size):
-        window = records.iloc[start:start + window_size]
-        vectors = []
-        for template in window["template"].tolist():
-            vectors.append(template_map.get(template, np.zeros(768, np.float16)))
-        padded = np.zeros((window_size, 768), dtype=np.float16)
-        padded[:len(vectors)] = np.asarray(vectors, dtype=np.float16)
-        template_sequences.append(padded)
-        labels.append(
-            [1, 0] if not (window["label"] == "Anomaly").any()
-            else [0, 1]
-        )
-        sample_ids.append(f"bgl:{start}:{start + window_size}")
+    with parsed_path.open(encoding="utf-8") as records:
+        for line in records:
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            label = record.get("label")
+            if label not in {"Normal", "Anomaly"}:
+                raise ValueError(f"Unexpected BGL label: {label!r}")
+            template = record.get("template")
+            current_ids.append(
+                template_ids.get(template, 0)
+                if isinstance(template, str)
+                else 0
+            )
+            current_anomaly |= label == "Anomaly"
+            records_read += 1
 
-    x_array = np.asarray(template_sequences, dtype=np.float16)
+            if len(current_ids) == window_size:
+                start = records_read - window_size
+                template_sequences.append(np.asarray(current_ids, dtype=np.int32))
+                labels.append([0, 1] if current_anomaly else [1, 0])
+                sample_ids.append(f"bgl:{start}:{records_read}")
+                current_ids = []
+                current_anomaly = False
+
+    x_array = np.asarray(template_sequences, dtype=np.int32)
     y_array = np.asarray(labels, dtype=np.int64)
     split_table = load_split_table(protocol_dir, "bgl")
     split_indices = align_indices(
@@ -220,7 +255,8 @@ def prepare_bgl(
         },
         "x_shape": list(x_array.shape),
         "y_shape": list(y_array.shape),
-        "dtype": "float16",
+        "dtype": "int32",
+        "sequence_representation": "template_ids",
         "anomaly_windows": int(y_array[:, 1].sum()),
         "split_paths": paths,
         "window_size": window_size,
@@ -263,14 +299,23 @@ def main() -> int:
             f"{protocol_manifest.get('protocol_version')!r}."
         )
 
-    templates = []
-    hdfs_template_df = pd.read_csv(args.hdfs_templates)
-    templates.extend(hdfs_template_df["EventTemplate"].tolist())
+    templates = set()
+    hdfs_template_df = pd.read_csv(
+        args.hdfs_templates,
+        usecols=["EventTemplate"],
+        dtype={"EventTemplate": "string"},
+    )
+    templates.update(hdfs_template_df["EventTemplate"].dropna().tolist())
     if args.bgl_jsonl.exists():
-        bgl_records = pd.read_json(args.bgl_jsonl, lines=True)
-        templates.extend(bgl_records["template"].drop_duplicates().tolist())
+        with args.bgl_jsonl.open(encoding="utf-8") as records:
+            for line in records:
+                if line.strip():
+                    template = json.loads(line).get("template")
+                    if isinstance(template, str) and template.strip():
+                        templates.add(template)
 
-    model, template_map = encode_templates(
+    print(f"Encoding {len(templates):,} unique templates", flush=True)
+    model, template_ids, _ = encode_templates(
         templates,
         args.model,
         args.output_dir,
@@ -282,7 +327,7 @@ def main() -> int:
             args.hdfs_traces,
             args.hdfs_labels,
             args.hdfs_templates,
-            template_map,
+            template_ids,
             args.output_dir,
             args.protocol_dir,
             args.hdfs_sequence_length,
@@ -293,7 +338,7 @@ def main() -> int:
     if args.bgl_jsonl.exists():
         bgl_summary = prepare_bgl(
             args.bgl_jsonl,
-            template_map,
+            template_ids,
             args.output_dir,
             args.protocol_dir,
             args.bgl_window_size,
@@ -308,6 +353,7 @@ def main() -> int:
         "protocol_dir": str(args.protocol_dir.resolve()),
         "hdfs_sequence_length": args.hdfs_sequence_length,
         "bgl_window_size": args.bgl_window_size,
+        "sequence_representation": "template_ids; embeddings are looked up per batch",
         "hdfs": hdfs_summary,
         "bgl": bgl_summary,
     }
