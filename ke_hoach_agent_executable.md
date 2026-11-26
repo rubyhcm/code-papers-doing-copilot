@@ -1321,18 +1321,21 @@ if __name__ == '__main__':
 
 **Input:**
 - `LogRAG/`
-- Full Drain-structured BGL CSV with `LineId`, `Label`, `Timestamp`,
-  `Content`, and `EventTemplate`, preserving the record order used to build
-  protocol v1
-- BigLog tokenizer/model directory
+- Parsed `data/parsed/bgl_structured.jsonl` from the `dataset-structured`
+  Kaggle input; preserve its original record order
 - `benchmark_protocol_v1/bgl.csv` and `manifest.json`
-- Internet-enabled Kaggle GPU runtime for the Ollama server and public Hugging
-  Face model downloads
+- Internet-enabled Kaggle GPU runtime for the Ollama server, public Hugging
+  Face model downloads, and the BigLog checkpoint download from Google Drive
 
 **Actions:**
 
-1. Attach the BGL CSV, BigLog model, and shared protocol as Kaggle input
-   datasets; enable a GPU accelerator and Internet access.
+1. Attach the `dataset-structured` JSONL and shared protocol as Kaggle input
+   datasets; enable a GPU accelerator and Internet access. The notebook
+   converts the JSONL to the required structured CSV in streaming mode and
+   checks its record count against protocol v1. It also clones the BigLog
+   pretrained-model repository and downloads its real checkpoint to
+   `/kaggle/working/BigLog/pretrained` because the repository's checked-in
+   checkpoint is only a placeholder.
 2. Use the Ollama GGUF conversion
    `hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:Q4_K_M`; the original
    `mistralai/Mistral-7B-Instruct-v0.1` repository contains Safetensors and is
@@ -1341,9 +1344,10 @@ if __name__ == '__main__':
 3. Use
    [`notebooks/lograg_kaggle_shared_bgl.ipynb`](notebooks/lograg_kaggle_shared_bgl.ipynb).
    It installs `LogRAG/requirements-kaggle.txt` without replacing Kaggle's
-   CUDA-enabled PyTorch, starts Ollama, downloads and smoke-tests the GGUF,
-   validates the structured input against the common 200-record windows, and
-   keeps the full run disabled until the user opts in.
+   CUDA-enabled PyTorch, downloads the BigLog checkpoint, starts Ollama,
+   downloads and smoke-tests the GGUF, validates the converted structured
+   input against the common 200-record windows, and keeps the full run disabled
+   until the user opts in.
 4. After the preflight succeeds and the local model check passes, set
    `RUN_FULL_BENCHMARK = True`. The notebook runs
    `python main_shared.py` from `LogRAG/`, trains on protocol train windows,

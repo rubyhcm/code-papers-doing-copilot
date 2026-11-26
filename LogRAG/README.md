@@ -62,7 +62,12 @@ You need to follow these steps to **completely** run `LogRAG` (Let's take an 
 
 **Step1: prepare the pretrained language model**
 
-1. get pretrained language model from [BigLog](https://github.com/LogAIBox/BigLog), and put the model file into the  ./pretrained 
+1. Get the BigLog model files from the
+   [BigLog pretrained-model repository](https://github.com/BiglogOpenSource/PretrainedModel).
+   The checked-in `pytorch_model.bin` is a placeholder; download the actual
+   checkpoint from [Google Drive](https://drive.google.com/file/d/12phqzt2QiAHjaO-BUDSyzNcmdg835rJG/view?usp=sharing)
+   and place it in `./pretrained`. The Kaggle notebook performs these download
+   steps automatically.
 2. The default local chat backend uses Ollama and a GGUF conversion of
    [Mistral-7B-Instruct-v0.1](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF).
    The original `mistralai/Mistral-7B-Instruct-v0.1` repository contains
@@ -145,12 +150,19 @@ and evaluates the held-out test windows once.
 
 Attach these as Kaggle input datasets:
 
-- The full Drain-structured BGL CSV with `LineId`, `Label`, `Timestamp`,
-  `Content`, and `EventTemplate` columns, in the same row order used to build
-  the shared protocol.
-- The BigLog tokenizer/model directory.
-- The `benchmark_protocol_v1` directory containing `bgl.csv` and
+- The parsed `bgl_structured.jsonl` file from the `dataset-structured` dataset.
+- The `benchmark_protocol_v1` dataset containing `bgl.csv` and
   `manifest.json`.
+
+The Kaggle notebook discovers these files under `/kaggle/input` and converts
+the BGL JSONL to the required `LineId`, `Label`, `Timestamp`, `Content`, and
+`EventTemplate` CSV in streaming mode. It checks the source record count
+against the shared protocol before continuing.
+
+The notebook clones the BigLog model repository and downloads the real
+`pytorch_model.bin` checkpoint into `/kaggle/working/BigLog/pretrained`; do not
+attach the BigLog checkpoint as an input dataset. This requires Kaggle Internet
+access to GitHub and Google Drive.
 
 Install the Kaggle-specific requirements without replacing Kaggle's
 CUDA-enabled PyTorch:
@@ -178,7 +190,7 @@ credentials in this repository. Then set:
 
 ```text
 LOGRAG_STRUCTURED_CSV=/kaggle/input/<dataset>/BGL.log_structured.csv
-LOGRAG_ENCODER_PATH=/kaggle/input/<dataset>/biglog
+LOGRAG_ENCODER_PATH=/kaggle/working/BigLog/pretrained
 LOGRAG_PROTOCOL_DIR=/kaggle/input/<dataset>/benchmark_protocol_v1
 LOGRAG_SHARED_OUTPUT_DIR=/kaggle/working/lograg-results
 LOGRAG_OUTPUT_DIR=/kaggle/working/lograg-results
