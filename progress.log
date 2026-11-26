@@ -8,8 +8,13 @@
 - [x] Cập nhật báo cáo LightAD và bảng RQ1-RQ3 trong nguồn luận văn.
 - [ ] Audit feature/label leakage cho HDFS và chạy thêm BGL inductive parse
   (fit Drain3 chỉ trên train) nếu cần đánh giá inductive nghiêm ngặt.
-- [ ] Chạy benchmark full nhiều seed cho LogFormer; LogRAG vẫn blocked do
-  thiếu pretrained model/LLM backend.
+- [ ] Chạy benchmark full nhiều seed cho LogFormer.
+- [ ] LogRAG: đã chuẩn bị runner/notebook Kaggle cho BGL theo shared protocol
+  v1 dùng Ollama Mistral-7B-Instruct-v0.1 GGUF Q4_K_M và local embeddings;
+  chưa chạy, chưa có metric. Cần Kaggle Internet, GPU và inputs (BGL
+  structured CSV, BigLog model, protocol files).
+- [ ] LogRAG HDFS: adapter tạo JSONL 575.061 block, nhưng chưa có runner
+  block-level khớp shared protocol; chưa có metric HDFS.
 
 ## 2026-11-25
 

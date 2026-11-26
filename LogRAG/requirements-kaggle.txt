@@ -1,0 +1,10 @@
+# Kaggle provides CUDA-enabled PyTorch; do not reinstall torch/torchvision here.
+langchain==0.2.14
+langchain_community==0.2.12
+langchain_openai==0.1.22
+chromadb==0.5.5
+openai==1.42.0
+PyYAML==6.0.2
+transformers==4.37.2
+ollama==0.3.3
+sentence-transformers==2.6.1

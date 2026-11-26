@@ -60,12 +60,20 @@ The required packages are listed in requirements.txt. Install:
 
 You need to follow these steps to **completely** run `LogRAG` (Let's take an example of using LogRAG on the BGL-Example dataset)
 
-**Step1: set api-key and get pretrained language model**
+**Step1: prepare the pretrained language model**
 
 1. get pretrained language model from [BigLog](https://github.com/LogAIBox/BigLog), and put the model file into the  ./pretrained 
-2. get chatgpt api-key for LogRAG-ChatGPT and LLM Embedding, we get from [here](https://www.closeai-asia.com/dashboard/)
-- As for LogRAG-ChatGPT, you need to set the **api-key** value  in configs.yaml
-- As for LogRAG-Mistral, you need first download [mistralai/Mistral-7B-Instruct-v0.1](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.1) from huggingface
+2. The default local chat backend uses Ollama and a GGUF conversion of
+   [Mistral-7B-Instruct-v0.1](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF).
+   The original `mistralai/Mistral-7B-Instruct-v0.1` repository contains
+   Safetensors; Ollama needs GGUF weights.
+3. The default Hugging Face embedding model is
+   `sentence-transformers/all-MiniLM-L6-v2`. An OpenAI chat or embedding backend
+   remains available when its API key is supplied at runtime; do not commit
+   credentials.
+4. For a local run outside Kaggle, install Ollama, start `ollama serve`, and
+   pull `hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:Q4_K_M` before running
+   `main.py`.
 
 **Step2: set config parameters**
 
@@ -81,12 +89,16 @@ window_time: 1800 # 30 minutes
 log_structed_path: ./dataset/BGL/bgl-example.log_structured.csv
 encoder_path: ./pretrained
 
-# openai key, you can get from :https://www.closeai-asia.com
-api_key: PUT_YOUR_OWN_API_KEY_HERE 
-api_base: https://api.openai-proxy.org/v1
+# OpenAI credentials are only needed if an OpenAI backend is selected.
+api_key: ""
+api_base: https://api.openai.com/v1
 
-llm_name: gpt-3.5-turbo
-# llm_name: mistralai/Mistral-7B-Instruct-v0.1 # from huggingface
+llm_backend: ollama
+llm_name: hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:Q4_K_M
+ollama_base_url: http://127.0.0.1:11434
+embedding_backend: huggingface
+embedding_model: sentence-transformers/all-MiniLM-L6-v2
+embedding_device: cpu
 
 # deepsvdd parameters
 normal_class: 0
@@ -122,3 +134,59 @@ Download the dataset and the desired model, and then adjust the configs paramete
 `python main.py` 
 
 and you will find the results in outpout/runtime.log ！
+
+## Kaggle shared-protocol BGL run
+
+The legacy `python main.py` path uses an 80/20 record split and is not the
+shared thesis benchmark. Use `main_shared.py` for BGL protocol-v1 evaluation.
+It aligns each parsed record to the common non-overlapping 200-record windows,
+validates their labels, trains on the train windows, reports validation metrics,
+and evaluates the held-out test windows once.
+
+Attach these as Kaggle input datasets:
+
+- The full Drain-structured BGL CSV with `LineId`, `Label`, `Timestamp`,
+  `Content`, and `EventTemplate` columns, in the same row order used to build
+  the shared protocol.
+- The BigLog tokenizer/model directory.
+- The `benchmark_protocol_v1` directory containing `bgl.csv` and
+  `manifest.json`.
+
+Install the Kaggle-specific requirements without replacing Kaggle's
+CUDA-enabled PyTorch:
+
+```bash
+pip install -r requirements-kaggle.txt
+```
+
+Enable Internet and a GPU accelerator in Kaggle. The notebook installs and
+starts Ollama, then pulls
+`hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:Q4_K_M` from Hugging Face. It
+uses `sentence-transformers/all-MiniLM-L6-v2` for local embeddings, so this
+configuration does not require an API key. This embedding choice changes the
+retrieval component from the previous OpenAI embedding setup and should be
+reported as such in thesis results. The 4-bit Mistral download and inference
+consume Kaggle storage/GPU runtime. If switching to OpenAI, supply the key as a
+Kaggle Secret; never put credentials in this repository. Then set:
+
+```text
+LOGRAG_STRUCTURED_CSV=/kaggle/input/<dataset>/BGL.log_structured.csv
+LOGRAG_ENCODER_PATH=/kaggle/input/<dataset>/biglog
+LOGRAG_PROTOCOL_DIR=/kaggle/input/<dataset>/benchmark_protocol_v1
+LOGRAG_SHARED_OUTPUT_DIR=/kaggle/working/lograg-results
+LOGRAG_OUTPUT_DIR=/kaggle/working/lograg-results
+LOGRAG_PERSIST_DIRECTORY=/kaggle/working/lograg-results/ragdb-bgl
+```
+
+From the `LogRAG` directory, run:
+
+```bash
+python main_shared.py
+```
+
+The output includes `results.json` and one window-level prediction CSV for
+validation and test, plus `model_activity.json` with the chat/embedding
+backends and query counts. This Ollama run uses local inference, not provider
+API billing. The current shared runner covers BGL only; HDFS requires the
+separate block-level adaptation and must not be reported as a completed
+LogRAG benchmark yet.

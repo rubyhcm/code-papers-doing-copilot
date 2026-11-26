@@ -8,13 +8,21 @@ window_time: 1800 # 30 minutes
 # dataset and model paths
 log_structed_path: ./dataset/BGL/bgl-example.log_structured.csv
 encoder_path: ./pretrained
+protocol_dir: ../data/splits/benchmark_protocol_v1
+shared_output_dir: ./output/shared_benchmark_v1
 
-# openai key
-api_key: PUT_YOUR_OWN_API_KEY_HERE 
-api_base: https://api.openai-proxy.org/v1
+# OpenAI credentials are only required when an OpenAI backend is selected.
+api_key: ""
+api_base: https://api.openai.com/v1
 
-llm_name: gpt-3.5-turbo
-# llm_name: mistralai/Mistral-7B-Instruct-v0.1 # from huggingface
+llm_backend: ollama
+llm_name: hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:Q4_K_M
+ollama_base_url: http://127.0.0.1:11434
+ollama_num_ctx: 4096
+ollama_num_predict: 512
+embedding_backend: huggingface
+embedding_model: sentence-transformers/all-MiniLM-L6-v2
+embedding_device: cpu
 
 # deepsvdd parameters
 normal_class: 0
@@ -27,9 +35,10 @@ batch_size: 40960
 weight_decay: 0.0005
 device: cuda:0
 n_jobs_dataloader: 0
+embedding_batch_size: 64
 
 # rag parameters
 threshold: 0.8
 topk: 5
 prompt: prompt5
-persist_directory: ./output/ragdb-bgl
+persist_directory: ./output/shared_benchmark_v1/ragdb-bgl

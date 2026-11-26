@@ -4,6 +4,8 @@ from langchain.prompts import PromptTemplate
 from langchain_community.llms import HuggingFacePipeline
 from langchain.chains import LLMChain
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from langchain_community.chat_models import ChatOllama
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI
@@ -22,14 +24,35 @@ class RAGPostProcessor:
     def __init__(self, configs, train_data_path, logger):
         self.train_data_path = train_data_path
         self.llm_name = configs['llm_name']
+        self.llm_backend = configs.get('llm_backend', 'openai')
+        self.embedding_backend = configs.get('embedding_backend', 'openai')
+        self.embedding_model = configs.get(
+            'embedding_model', 'text-embedding-ada-002'
+        )
+        self.embedding_device = configs.get('embedding_device', 'cpu')
         self.threshold = configs['threshold']
         self.topk = configs['topk']
         self.api_key = configs['api_key']
         self.api_base = configs['api_base']
+        self.ollama_base_url = configs.get(
+            'ollama_base_url', 'http://127.0.0.1:11434'
+        )
+        self.ollama_num_ctx = configs.get('ollama_num_ctx', 4096)
+        self.ollama_num_predict = configs.get('ollama_num_predict', 512)
         self.persist_directory = configs['persist_directory']
+        self.output_dir = configs.get('output_dir', './output')
         self.device = configs['device']
         self.prompt = self._import_prompt(configs['prompt'])
         self.logger = logger
+        self.model_activity = {
+            "chat_backend": self.llm_backend,
+            "chat_model": self.llm_name,
+            "embedding_backend": self.embedding_backend,
+            "embedding_model": self.embedding_model,
+            "embedded_documents": 0,
+            "chat_queries": 0,
+            "json_repair_queries": 0,
+        }
 
     def _import_prompt(self, prompt_name):
         # 动态导入 postprocess.prompts 模块
@@ -37,34 +60,74 @@ class RAGPostProcessor:
         # 获取对应的 prompt 对象
         return getattr(module, prompt_name)
     def get_llm(self, llm_name):
-        if "gpt" in llm_name:
-            llm = ChatOpenAI(model_name=llm_name, temperature=0)
-        else:
+        if self.llm_backend == "openai":
+            return ChatOpenAI(
+                model_name=llm_name,
+                temperature=0,
+                api_key=self.api_key,
+                base_url=self.api_base,
+            )
+        if self.llm_backend == "ollama":
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            return ChatOllama(
+                model=llm_name,
+                base_url=self.ollama_base_url,
+                temperature=0,
+                num_ctx=self.ollama_num_ctx,
+                num_predict=self.ollama_num_predict,
+                format="json",
+            )
+        if self.llm_backend == "transformers":
             llm = self.get_local_llm(llm_name)
-        return llm
+            return llm
+        raise ValueError(f"Unsupported LogRAG chat backend: {self.llm_backend}")
 
     def ask_ChatGPT(self, prompt_content):
-        client = OpenAI(
-            base_url = self.api_base,
-            api_key  = self.api_key,
-        )
-        chat_completion = client.chat.completions.create(
+        self.model_activity["json_repair_queries"] += 1
+        if self.llm_backend == "openai":
+            client = OpenAI(
+                base_url=self.api_base,
+                api_key=self.api_key,
+            )
+            chat_completion = client.chat.completions.create(
                 messages=[
                     {
-                        "role": "user", 
+                        "role": "user",
                         "content": prompt_content
                     }
                 ],
-                model="gpt-3.5-turbo",
+                model=self.llm_name,
                 temperature=0,
             )
-        content = chat_completion.choices[0].message.content
-        return content 
+            return chat_completion.choices[0].message.content
+        response = self.get_llm(self.llm_name).invoke(prompt_content)
+        content = getattr(response, "content", response)
+        if not isinstance(content, str):
+            raise TypeError("Chat model returned non-text JSON repair output")
+        return content
 
 
     def get_vectordb(self, normal_log_entries):
-        # 做成Embedding存入到Vector db
-        embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
+        if self.embedding_backend == "openai":
+            embedding = OpenAIEmbeddings(
+                model=self.embedding_model,
+                api_key=self.api_key,
+                base_url=self.api_base,
+            )
+        elif self.embedding_backend == "huggingface":
+            embedding = HuggingFaceEmbeddings(
+                model_name=self.embedding_model,
+                model_kwargs={"device": self.embedding_device},
+                encode_kwargs={"normalize_embeddings": True},
+            )
+        else:
+            raise ValueError(
+                f"Unsupported LogRAG embedding backend: "
+                f"{self.embedding_backend}"
+            )
+        self.model_activity["embedded_documents"] = len(normal_log_entries)
         # 读取训练数据
         if not os.path.exists(self.persist_directory):
             os.mkdir(self.persist_directory)
@@ -145,8 +208,11 @@ class RAGPostProcessor:
         return normal_log_entries
 
     def post_process(self, anomaly_logs_path, test_data_path):
-        result_path = 'output/anomaly_logs_detc_by_rag.csv'        
-        answer_path = 'output/llm_answer.json'
+        os.makedirs(self.output_dir, exist_ok=True)
+        result_path = os.path.join(
+            self.output_dir, 'anomaly_logs_detc_by_rag.csv'
+        )
+        answer_path = os.path.join(self.output_dir, 'llm_answer.json')
         
         QA_CHAIN_PROMPT = PromptTemplate.from_template(template=self.prompt)
         normal_log_entries = self.get_normal_log_entries()
@@ -175,6 +241,7 @@ class RAGPostProcessor:
         
         for test_log in tqdm(pos_log_templates):
 
+            self.model_activity["chat_queries"] += 1
             answer = qa_chain.invoke({"query": test_log})
             # 提取每个Document对象的page_content
             answer['source_documents'] = [doc.page_content for doc in answer['source_documents']]
@@ -219,6 +286,13 @@ class RAGPostProcessor:
 
         with open(answer_path, 'w') as file:
             json.dump(answer_list, file)
+
+        with open(
+            os.path.join(self.output_dir, 'model_activity.json'),
+            'w',
+            encoding='utf-8',
+        ) as file:
+            json.dump(self.model_activity, file, indent=2)
             
         self.logger.info(f'Saved results to \n{result_path}\n{answer_path}')
         

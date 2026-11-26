@@ -1320,71 +1320,64 @@ if __name__ == '__main__':
 ### 📋 TASK 3.4-3.5: Tái lập LogRAG
 
 **Input:**
-- `repos/LogRAG/`
-- Parsed BGL data (start with BGL only)
-- API key or local LLM
+- `LogRAG/`
+- Full Drain-structured BGL CSV with `LineId`, `Label`, `Timestamp`,
+  `Content`, and `EventTemplate`, preserving the record order used to build
+  protocol v1
+- BigLog tokenizer/model directory
+- `benchmark_protocol_v1/bgl.csv` and `manifest.json`
+- Internet-enabled Kaggle GPU runtime for the Ollama server and public Hugging
+  Face model downloads
 
 **Actions:**
 
-```bash
-cd repos/LogRAG
-
-# Setup API key (Option 1: OpenAI)
-export OPENAI_API_KEY="sk-..."
-
-# OR Setup local LLM (Option 2: Mistral-7B)
-# Download and setup Mistral-7B-Instruct
-python setup_local_llm.py
-
-# Update config
-cat > config.yaml << EOF
-dataset: bgl
-data_path: ../../data/splits/bgl_train.csv
-test_path: ../../data/splits/bgl_test.csv
-
-# DeepSVDD phase
-deepsvdd:
-  epochs: 50
-  lr: 0.0001
-  
-# RAG phase
-rag:
-  retriever: faiss
-  top_k: 5
-  llm_backend: openai  # or 'mistral_local'
-  llm_model: gpt-3.5-turbo  # or 'mistral-7b-instruct'
-EOF
-
-# Run LogRAG
-python main.py --config config.yaml --output results/bgl/
-
-# Extract results
-python -c "
-import json
-with open('results/bgl/metrics.json') as f:
-    metrics = json.load(f)
-
-results = {'bgl': metrics}
-with open('../../results/lograg_baseline_bgl.json', 'w') as f:
-    json.dump(results, f, indent=2)
-"
-```
+1. Attach the BGL CSV, BigLog model, and shared protocol as Kaggle input
+   datasets; enable a GPU accelerator and Internet access.
+2. Use the Ollama GGUF conversion
+   `hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:Q4_K_M`; the original
+   `mistralai/Mistral-7B-Instruct-v0.1` repository contains Safetensors and is
+   not the GGUF artifact used by Ollama. Use local
+   `sentence-transformers/all-MiniLM-L6-v2` embeddings.
+3. Use
+   [`notebooks/lograg_kaggle_shared_bgl.ipynb`](notebooks/lograg_kaggle_shared_bgl.ipynb).
+   It installs `LogRAG/requirements-kaggle.txt` without replacing Kaggle's
+   CUDA-enabled PyTorch, starts Ollama, downloads and smoke-tests the GGUF,
+   validates the structured input against the common 200-record windows, and
+   keeps the full run disabled until the user opts in.
+4. After the preflight succeeds and the local model check passes, set
+   `RUN_FULL_BENCHMARK = True`. The notebook runs
+   `python main_shared.py` from `LogRAG/`, trains on protocol train windows,
+   reports validation metrics, and evaluates the test windows once.
 
 **Output:**
-- `results/lograg_baseline_bgl.json`
-- `experiments/03_lograg_reproduction_report.md`
-- Cost log: `experiments/lograg_api_costs.txt` (if using API)
+- Kaggle output directory `lograg-results-<run-id>/`, containing
+  `results.json`, window-level validation/test predictions, model/checkpoint
+  files, logs, the Chroma database, and `model_activity.json` metadata
+- After downloading the Kaggle output, update
+  `experiments/03_lograg_reproduction_report.md` with actual run metadata
+  and metrics
 
 **Acceptance Criteria:**
 - [ ] DeepSVDD phase completes
 - [ ] RAG retrieval working
-- [ ] LLM reasoning generated
-- [ ] Metrics within ±5% of paper
-- [ ] API costs logged (if applicable)
+- [ ] Local Ollama/Mistral generates valid JSON reasoning
+- [ ] Input window IDs and labels validate exactly against protocol v1
+- [ ] Validation and test metrics/predictions are saved separately
+- [ ] Test split is not used to select the configuration
+- [ ] Chat and embedding backends/query counts are recorded
 
-**Risk:** HIGH - API dependency or need local GPU for Mistral
+**Risk:** HIGH - model download, Ollama availability, or GPU/storage limits
 
-**Mitigation:** If fails after 1.5 weeks, document issue and proceed with 2 methods only
+**Mitigation:** Confirm Kaggle Internet, GPU, and free disk space with the
+notebook's Ollama smoke test before starting the full training run.
+
+**Implementation note:** The old example command using `setup_local_llm.py` and
+`python main.py --config ...` did not match the repository. The current legacy
+`main.py` uses a different 80/20 record split; use `main_shared.py` for
+protocol-v1 BGL results. This task covers BGL only. HDFS remains a separate,
+unfinished LogRAG extension under TASK 3.7, so do not claim a two-dataset
+LogRAG result yet. No OpenAI key is required for the default Ollama plus local
+Hugging Face embedding configuration.
 
 **Estimated Time:** 8-12 hours (+ potential debugging)
 
@@ -1486,125 +1479,41 @@ if __name__ == '__main__':
 - HDFS_v1 parsed data
 - LogRAG paper architecture
 
+**Status corrected on 2026-11-26:** `LogRAG/adapt_hdfs.py` already creates
+575,061 block sessions in JSONL, as recorded in
+`experiments/04_lograg_hdfs_extension.md`. This output is not consumed by the
+current BGL-only `main.py`; `config_hdfs.yaml` and the CLI flags shown in the
+historical sketch below are not implemented. Do not treat this adapter as an
+HDFS LogRAG benchmark.
+
 **Actions:**
 
+The adapter already exists. To regenerate its JSONL output, use the actual
+repository script and dataset paths:
+
 ```bash
-cd repos/LogRAG
-
-# Create HDFS adapter
-cat > adapt_hdfs.py << 'EOF'
-"""
-Adapt LogRAG for HDFS_v1 dataset
-Key difference: Block-based grouping instead of time windows
-"""
-import pandas as pd
-import json
-
-def create_hdfs_sessions(parsed_jsonl, labels_csv, output_file):
-    """
-    HDFS uses BlockId for session grouping
-    Each block = one session
-    """
-    logs = []
-    with open(parsed_jsonl) as f:
-        for line in f:
-            logs.append(json.loads(line))
-    
-    df = pd.DataFrame(logs)
-    labels = pd.read_csv(labels_csv)
-    
-    # Merge with labels
-    df = df.merge(labels, left_index=True, right_index=True, how='left')
-    
-    # Group by BlockId
-    sessions = []
-    for block_id, group in df.groupby('BlockId'):
-        session = {
-            'session_id': block_id,
-            'log_sequence': group['template'].tolist(),
-            'event_ids': group['template_id'].tolist(),
-            'label': int(group['Label'].max()),  # Anomalous if any log is
-            'log_count': len(group)
-        }
-        sessions.append(session)
-    
-    # Save in LogRAG format
-    with open(output_file, 'w') as f:
-        for session in sessions:
-            f.write(json.dumps(session) + '\n')
-    
-    print(f"Created {len(sessions)} HDFS sessions")
-    print(f"Anomaly rate: {sum(s['label'] for s in sessions) / len(sessions):.3%}")
-
-create_hdfs_sessions(
-    '../../data/parsed/hdfs_v1_structured.jsonl',
-    '../../data/raw/hdfs_v1/preprocessed/anomaly_label.csv',
-    'data/hdfs_sessions.jsonl'
-)
-EOF
-
-python adapt_hdfs.py
-
-# Update config for HDFS
-cat > config_hdfs.yaml << EOF
-dataset: hdfs
-data_path: data/hdfs_sessions.jsonl
-train_ratio: 0.8
-val_ratio: 0.1
-
-# Session-based (not time-window)
-session_based: true
-
-# DeepSVDD parameters
-deepsvdd:
-  epochs: 50
-  lr: 0.0001
-  hidden_dims: [128, 64]
-
-# RAG parameters  
-rag:
-  retriever: faiss
-  top_k: 5
-  llm_backend: openai  # or mistral_local
-  llm_model: gpt-3.5-turbo
-  
-output_dir: results/hdfs/
-EOF
-
-# Run LogRAG on HDFS
-python main.py --config config_hdfs.yaml
-
-# Extract results
-python -c "
-import json
-with open('results/hdfs/metrics.json') as f:
-    metrics = json.load(f)
-    
-# Update consolidated results
-with open('../../results/lograg_baseline_bgl.json') as f:
-    all_results = json.load(f)
-
-all_results['hdfs'] = metrics
-
-with open('../../results/lograg_baseline_full.json', 'w') as f:
-    json.dump(all_results, f, indent=2)
-    
-print('LogRAG now supports both datasets!')
-"
+python LogRAG/adapt_hdfs.py \
+  --traces /path/to/Event_traces.csv \
+  --output LogRAG/data/hdfs_sessions.jsonl
 ```
+
+This only prepares block-level session data. A shared-protocol HDFS runner,
+predictions, and metrics still need to be implemented and validated; do not
+create a HDFS config or extract benchmark results yet.
 
 **Output:**
 - `repos/LogRAG/adapt_hdfs.py`
-- `repos/LogRAG/config_hdfs.yaml`
-- `results/lograg_baseline_full.json` (BGL + HDFS)
+- `LogRAG/data/hdfs_sessions.jsonl` (adapter output only; not benchmark metrics)
+- `results/lograg_baseline_full.json` only after a validated HDFS runner exists
 - `experiments/04_lograg_hdfs_extension.md` (documentation)
 
 **Acceptance Criteria:**
-- [ ] HDFS sessions created correctly (grouped by BlockId)
+- [x] HDFS session adapter creates 575,061 BlockId-level records
 - [ ] LogRAG runs on HDFS without errors
+- [ ] HDFS predictions and labels match the shared protocol by BlockId
 - [ ] Metrics comparable to paper (if paper tested HDFS)
 - [ ] Both BGL and HDFS results available
-- [ ] Session count reasonable (~1-2M sessions expected)
+- [x] Session count matches the shared protocol: 575,061 blocks
 
 **Estimated Time:** 6-8 hours
 
