@@ -6,3 +6,4 @@ analysis/
 LogFormer/preprocessed_data/BGL_training.npz
 LogFormer/preprocessed_data/sentence_transformer/model.safetensors
 kaggle-lightad-result/bgl_structured.csv
+kaggle-lightad-result/bgl_structured.jsonl
