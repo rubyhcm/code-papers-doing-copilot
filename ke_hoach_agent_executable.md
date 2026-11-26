@@ -1325,7 +1325,7 @@ if __name__ == '__main__':
   Kaggle input; preserve its original record order
 - `benchmark_protocol_v1/bgl.csv` and `manifest.json`
 - Internet-enabled Kaggle GPU runtime for the Ollama server, public Hugging
-  Face model downloads, and the BigLog checkpoint download from Google Drive
+  Face model downloads, including the BigLog checkpoint
 
 **Actions:**
 
@@ -1333,9 +1333,11 @@ if __name__ == '__main__':
    datasets; enable a GPU accelerator and Internet access. The notebook
    converts the JSONL to the required structured CSV in streaming mode and
    checks its record count against protocol v1. It also clones the BigLog
-   pretrained-model repository and downloads its real checkpoint to
-   `/kaggle/working/BigLog/pretrained` because the repository's checked-in
-   checkpoint is only a placeholder.
+   repository and downloads the real `pytorch_model.bin` checkpoint from
+   `thatbbob/BigLog` on Hugging Face to    `/kaggle/working/BigLog-LogAIBox/pretrained`.
+   The repository's checked-in checkpoint is only a placeholder. If the
+   Hugging Face download is unavailable, attach `pytorch_model.bin` as a Kaggle
+   input instead.
 2. Use the Ollama GGUF conversion
    `hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:Q4_K_M`; the original
    `mistralai/Mistral-7B-Instruct-v0.1` repository contains Safetensors and is

@@ -62,12 +62,12 @@ You need to follow these steps to **completely** run `LogRAG` (Let's take an 
 
 **Step1: prepare the pretrained language model**
 
-1. Get the BigLog model files from the
-   [BigLog pretrained-model repository](https://github.com/BiglogOpenSource/PretrainedModel).
-   The checked-in `pytorch_model.bin` is a placeholder; download the actual
-   checkpoint from [Google Drive](https://drive.google.com/file/d/12phqzt2QiAHjaO-BUDSyzNcmdg835rJG/view?usp=sharing)
-   and place it in `./pretrained`. The Kaggle notebook performs these download
-   steps automatically.
+1. Get the BigLog code from the
+   [official BigLog repository](https://github.com/LogAIBox/BigLog). Its
+   checked-in `pretrained/pytorch_model.bin` is a placeholder; the official
+   README points to the actual checkpoint in
+   [the `thatbbob/BigLog` Hugging Face repository](https://huggingface.co/thatbbob/BigLog).
+   The Kaggle notebook downloads that checkpoint automatically.
 2. The default local chat backend uses Ollama and a GGUF conversion of
    [Mistral-7B-Instruct-v0.1](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF).
    The original `mistralai/Mistral-7B-Instruct-v0.1` repository contains
@@ -159,10 +159,12 @@ the BGL JSONL to the required `LineId`, `Label`, `Timestamp`, `Content`, and
 `EventTemplate` CSV in streaming mode. It checks the source record count
 against the shared protocol before continuing.
 
-The notebook clones the BigLog model repository and downloads the real
-`pytorch_model.bin` checkpoint into `/kaggle/working/BigLog/pretrained`; do not
-attach the BigLog checkpoint as an input dataset. This requires Kaggle Internet
-access to GitHub and Google Drive.
+The notebook clones the official BigLog code repository and downloads the real
+`pytorch_model.bin` checkpoint from Hugging Face into
+`/kaggle/working/BigLog-LogAIBox/pretrained`. If the Hugging Face download is unavailable,
+attach the checkpoint as a Kaggle input; the notebook will copy it into the
+expected directory. GitHub and Hugging Face downloads require Kaggle Internet
+access.
 
 Install the Kaggle-specific requirements without replacing Kaggle's
 CUDA-enabled PyTorch:
