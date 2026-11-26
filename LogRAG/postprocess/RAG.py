@@ -59,6 +59,23 @@ class RAGPostProcessor:
         module = importlib.import_module('postprocess.prompts')
         # 获取对应的 prompt 对象
         return getattr(module, prompt_name)
+
+    @staticmethod
+    def _parse_json_object(content):
+        decoder = json.JSONDecoder()
+        for start, character in enumerate(content):
+            if character != "{":
+                continue
+            try:
+                result, _ = decoder.raw_decode(content[start:])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(result, dict) and "is_anomaly" in result:
+                return result
+        raise ValueError(
+            "No JSON object with is_anomaly found in chat model response"
+        )
+
     def get_llm(self, llm_name):
         if self.llm_backend == "openai":
             return ChatOpenAI(
@@ -250,10 +267,10 @@ class RAGPostProcessor:
             
             content = answer['result']
             try:
-                result = json.loads(content)
-            except Exception as e:
+                result = self._parse_json_object(content)
+            except ValueError as error:
                 self.logger.info('---begin---')
-                self.logger.info(e)
+                self.logger.info(error)
                 self.logger.info(content)
                 self.logger.info('---end-----')
                 prompt = "Please keep only the Json part of the following content, and fill the is_anomaly into the \'is_anomaly\', \
@@ -261,7 +278,7 @@ class RAGPostProcessor:
                 prompt_content = prompt + content      
                 content = self.ask_ChatGPT(prompt_content)
                 self.logger.info("regenerate: "  + content)
-                result = json.loads(content)
+                result = self._parse_json_object(content)
             # 提取is_anomaly和reason
             is_anomaly = result['is_anomaly']
             try:

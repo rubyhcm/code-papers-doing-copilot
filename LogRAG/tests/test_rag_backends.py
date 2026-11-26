@@ -7,6 +7,20 @@ from postprocess import RAG
 
 
 class RAGBackendTests(unittest.TestCase):
+    def test_parser_extracts_json_object_followed_by_extra_text(self):
+        parsed = RAG.RAGPostProcessor._parse_json_object(
+            'Here is the result:\n{"is_anomaly": 1, "reason": "unusual"}\nDone.'
+        )
+
+        self.assertEqual(
+            parsed,
+            {"is_anomaly": 1, "reason": "unusual"},
+        )
+
+    def test_parser_rejects_response_without_json_object(self):
+        with self.assertRaisesRegex(ValueError, "No JSON object"):
+            RAG.RAGPostProcessor._parse_json_object("No structured answer.")
+
     def test_ollama_chat_uses_configured_model_and_server(self):
         processor = object.__new__(RAG.RAGPostProcessor)
         processor.llm_backend = "ollama"
