@@ -231,3 +231,17 @@ Trong 6 phương pháp, có 2 phương pháp có cơ chế giải thích nội t
    - Nếu hệ thống hay cập nhật code (nhiều template mới) → Không nên chọn LightAD/SemPCA vì sẽ bị dội bom cảnh báo giả (FP).
    - Nếu cần khoanh vùng nhanh dòng log gây lỗi → Nên chọn Logs2Graph.
    - Nếu cần tóm tắt sự cố bằng tiếng người cho đội trực ban → Cân nhắc LogRAG (chấp nhận chi phí API).
+
+-------
+
+LightAD đã có kết quả và báo cáo cập nhật, nhưng luận văn chưa hoàn tất: bản hiện tại khoảng 13 trang, mới có chương 1–4 và kết quả LightAD. Đường xử lý tiết kiệm bộ nhớ cho LogFormer cũng đã có trong prepare_logformer_embeddings.py và dataloader.py.
+
+Thứ tự nên làm tiếp:
+
+Chốt phạm vi với giảng viên. research_questions.md đặt các câu hỏi rộng hơn LightAD. Hãy quyết định sẽ hoàn thành cả LogFormer, LogRAG và RQ4, hay thu hẹp phạm vi luận văn một cách chính thức.
+Khóa phương pháp trước khi chạy thêm. Kiểm tra HDFS không đưa Label/BlockId vào đặc trưng và không trùng ID giữa các split. Với BGL, Drain3 hiện được fit trên toàn bộ luồng trước khi chia; chọn chạy lại theo hướng chỉ fit trên train, hoặc giữ kết quả hiện tại nhưng nêu rõ đây là quy trình transductive.
+Chạy LogFormer trên Kaggle. Bắt đầu bằng một seed/epoch để kiểm tra bộ nhớ, thời gian và đầu ra; sau đó mới chạy cấu hình chính thức trên cùng split, lưu log, checkpoint và dự đoán test. Cấu hình 5 seed × 20 epoch tương đương khoảng 749 nghìn batch cập nhật cho cả HDFS và BGL, nên cần đo thời gian trước khi khởi chạy toàn bộ. Notebook liên quan: logformer_kaggle_full_training.ipynb.
+Quyết định khả năng chạy LogRAG. Hiện phần này còn thiếu mô hình/backend và cấu hình tài nguyên. Nếu không thể thực hiện, điều chỉnh câu hỏi nghiên cứu và tuyên bố phạm vi với giảng viên; không trình bày kết quả chưa chạy.
+Hoàn tất phân tích. Nếu giữ RQ4, phân loại false positive/false negative và làm các ca phân tích có tiêu chí rõ ràng. Chỉ dùng validation để chọn ngưỡng; test dành cho đánh giá cuối.
+Hoàn thiện luận văn. Bổ sung thảo luận, kết luận, tài liệu tham khảo và phụ lục tái lập; ghi rõ giới hạn về phần cứng/thời gian vì kết quả LightAD hiện chưa có đầy đủ metadata và peak memory. Dùng progress.log và báo cáo LightAD làm điểm đối chiếu.
+Việc kế tiếp cụ thể: chốt phạm vi và cách xử lý BGL, rồi chạy thử LogFormer một seed/epoch trên Kaggle trước khi quyết định chạy toàn bộ.
